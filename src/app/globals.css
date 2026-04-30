@@ -1,0 +1,70 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --foreground-rgb: 1, 113, 150;
+  --background-start-rgb: 247, 249, 251;
+  --background-end-rgb: 255, 255, 255;
+}
+
+body {
+  color: #1e293b;
+  background: #F7F9FB;
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+
+@layer components {
+  .glass-card {
+    @apply bg-white/70 backdrop-blur-xl border border-white/40 shadow-premium;
+  }
+  
+  .btn-premium {
+    @apply px-8 py-4 bg-cedar-primary text-white rounded-2xl font-semibold shadow-premium transition-all duration-300 hover:shadow-premium-hover active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3;
+  }
+
+  .btn-outline {
+    @apply px-8 py-4 bg-transparent border-2 border-cedar-primary text-cedar-primary rounded-2xl font-semibold transition-all duration-300 hover:bg-cedar-primary hover:text-white active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3;
+  }
+
+  .input-field {
+    @apply w-full px-6 py-4 bg-white/50 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-cedar-aqua/20 focus:border-cedar-primary outline-none transition-all duration-300 placeholder:text-slate-400;
+  }
+
+  .nav-link {
+    @apply text-slate-500 font-medium hover:text-cedar-primary transition-colors duration-200 relative after:content-[''] after:absolute after:bottom-[-4px] after:left-0 after:w-0 after:h-[2px] after:bg-cedar-primary after:transition-all hover:after:w-full;
+  }
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: #f1f5f9;
+}
+::-webkit-scrollbar-thumb {
+  background: #01719633;
+  border-radius: 10px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #01719666;
+}
+
+/* Animations */
+@keyframes soft-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-15px); }
+}
+
+.animate-soft-float {
+  animation: soft-float 6s ease-in-out infinite;
+}
+
+/* Typography fix for Serif */
+.font-serif {
+  font-family: 'Playfair Display', serif;
+}
