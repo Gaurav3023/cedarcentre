@@ -21,10 +21,10 @@ EduNavItem.displayName = 'EduNavItem';
 
 const StatCard = React.memo(({ icon, label, value, color }: { icon: React.ReactNode, label: string, value: number, color: string }) => {
   return (
-    <div className="bg-white p-10 rounded-[4rem] border border-slate-50 shadow-sm hover:shadow-premium transition-all group">
-      <div className={`w-16 h-16 rounded-3xl flex items-center justify-center mb-8 shadow-inner transition-transform group-hover:rotate-6 ${color}`}>{icon}</div>
-      <p className="text-[10px] font-black uppercase text-slate-400 tracking-[0.2em] mb-3">{label}</p>
-      <p className="text-5xl font-serif text-slate-800 italic">{value}</p>
+    <div className="bg-white p-6 md:p-10 rounded-[2.5rem] md:rounded-[4rem] border border-slate-50 shadow-sm hover:shadow-premium transition-all group">
+      <div className={`w-14 h-14 md:w-16 md:h-16 rounded-2xl md:rounded-3xl flex items-center justify-center mb-6 md:mb-8 shadow-inner transition-transform group-hover:rotate-6 ${color}`}>{icon}</div>
+      <p className="text-[9px] md:text-[10px] font-black uppercase text-slate-400 tracking-[0.2em] mb-2 md:mb-3">{label}</p>
+      <p className="text-4xl md:text-5xl font-serif text-slate-800 italic">{value}</p>
     </div>
   );
 });
@@ -282,7 +282,7 @@ function EducatorDashboardContent() {
             <header className="mb-12 flex flex-col md:flex-row md:items-end justify-between gap-6">
               <div>
                 <p className="text-[10px] font-black uppercase text-cedar-primary tracking-[0.3em] mb-3">Educator Portal</p>
-                <h1 className="text-5xl lg:text-6xl font-serif text-slate-800 italic leading-none">
+                <h1 className="text-4xl md:text-5xl lg:text-6xl font-serif text-slate-800 italic leading-none">
                   {activeTab === 'dashboard' ? `Hello, ${user?.name.split(' ')[0]}!` : activeTab === 'lessons' ? 'Curriculum' : activeTab === 'students' ? 'Classroom' : activeTab === 'submissions' ? 'Submissions' : 'Assistance'}
                 </h1>
                 <p className="text-slate-400 mt-4 font-medium tracking-tight">
@@ -309,7 +309,7 @@ function EducatorDashboardContent() {
                       <List className="w-5 h-5" />
                     </button>
                   </div>
-                  <button onClick={() => { resetLessonForm(); setLessonModal({ mode: 'create' }); }} className="flex items-center gap-3 bg-cedar-primary text-white px-8 py-4 rounded-[2rem] font-bold text-sm shadow-xl shadow-cedar-primary/20 hover:scale-105 transition-all w-fit"><Plus className="w-5 h-5" /> Create Stair Step</button>
+                  <button onClick={() => { resetLessonForm(); setLessonModal({ mode: 'create' }); }} className="flex items-center gap-3 bg-cedar-primary text-white px-6 md:px-8 py-3 md:py-4 rounded-2xl md:rounded-[2rem] font-bold text-xs md:text-sm shadow-xl shadow-cedar-primary/20 hover:scale-105 transition-all w-full md:w-fit justify-center md:justify-start"><Plus className="w-5 h-5" /> Create Stair Step</button>
                 </div>
               )}
           </header>
@@ -382,11 +382,11 @@ function EducatorDashboardContent() {
                          <div className={viewMode === 'grid' ? "grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8" : "space-y-4"}>
                             {grouped[weekNum].lessons.map((lesson: Lesson) => (
                               viewMode === 'grid' ? (
-                                <div key={lesson.id} className="bg-white rounded-[4rem] border border-slate-50 shadow-sm hover:shadow-premium transition-all flex flex-col overflow-hidden group">
-                                   <div className="p-10 flex-1">
+                                <div key={lesson.id} className="bg-white rounded-[2.5rem] md:rounded-[4rem] border border-slate-50 shadow-sm hover:shadow-premium transition-all flex flex-col overflow-hidden group">
+                                   <div className="p-8 md:p-10 flex-1">
                                       <div className="flex justify-between items-start mb-10"><div className="w-20 h-20 bg-[#F1F5F9] rounded-[2rem] flex items-center justify-center shadow-inner">{lesson.type === 'video' ? <PlayCircle className="w-8 h-8 text-slate-500" /> : lesson.type === 'activity' ? <ClipboardList className="w-8 h-8 text-slate-500" /> : <BookOpen className="w-8 h-8 text-slate-500" />}</div><div className="flex items-center gap-2"><button onClick={() => openEditModal(lesson)} className="p-3 text-slate-300 hover:text-cedar-primary transition-colors"><Edit2 className="w-5 h-5" /></button><button onClick={() => { if(confirm("Delete this journey step?")) deleteLesson(lesson.id); }} className="p-3 text-slate-300 hover:text-red-500 transition-colors"><Trash2 className="w-5 h-5" /></button></div></div>
                                       <p className="text-[11px] font-black uppercase text-cedar-aqua tracking-[0.15em] mb-4">{lesson.type}</p>
-                                      <h5 className="text-4xl font-serif text-slate-800 italic mb-6 leading-tight">{lesson.title}</h5>
+                                      <h5 className="text-3xl md:text-4xl font-serif text-slate-800 italic mb-6 leading-tight">{lesson.title}</h5>
                                       <p className="text-slate-500 text-lg leading-relaxed line-clamp-3 mb-8">{lesson.content}</p>
                                       
                                       <div className="flex flex-wrap gap-3 mb-10">
@@ -525,7 +525,7 @@ function EducatorDashboardContent() {
             {activeTab === 'support' && (
               <motion.div key="support-tab" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} className="space-y-8">
                  {mySupportRequests.filter(r => r.status === 'open' || r.educatorHasUnread).map(req => (
-                   <motion.div key={req.id} onViewportEnter={() => req.educatorHasUnread && markSupportAsRead(req.id, 'educator')} className={`bg-white p-8 rounded-[4rem] border transition-all flex flex-col gap-8 shadow-sm relative ${req.educatorHasUnread ? 'ring-2 ring-red-500/10 border-red-100' : 'border-slate-50'}`}>
+                   <motion.div key={req.id} onViewportEnter={() => req.educatorHasUnread && markSupportAsRead(req.id, 'educator')} className={`bg-white p-6 md:p-8 rounded-[2rem] md:rounded-[4rem] border transition-all flex flex-col gap-6 md:gap-8 shadow-sm relative ${req.educatorHasUnread ? 'ring-2 ring-red-500/10 border-red-100' : 'border-slate-50'}`}>
                       {req.educatorHasUnread && <div className="absolute top-0 right-0 p-4 bg-red-500 text-white text-[8px] font-black uppercase tracking-widest rounded-bl-[1.5rem] animate-bounce z-10">New Message</div>}
                       <div className="flex justify-between items-center border-b border-slate-50 pb-6">
                          <div className="flex items-center gap-4"><div className="w-12 h-12 bg-slate-50 rounded-xl flex items-center justify-center font-bold text-slate-400">{users.find(u => u.id === req.studentId)?.name[0]}</div><div><h4 className="font-bold text-slate-800">{users.find(u => u.id === req.studentId)?.name}</h4><p className="text-[9px] text-slate-400 font-black uppercase tracking-widest">Case #{req.id.slice(-4)}</p></div></div>
@@ -575,10 +575,10 @@ function EducatorDashboardContent() {
 
         {/* Modals */}
         {studentDetail && (
-           <div className="fixed inset-0 bg-slate-950/60 backdrop-blur-md z-[600] flex items-center justify-center p-6">
-              <motion.div initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="bg-white rounded-[4rem] w-full max-w-4xl p-12 shadow-2xl relative flex flex-col max-h-[90vh]">
-                 <button onClick={() => setStudentDetail(null)} className="absolute top-10 right-10 p-3 text-slate-300 hover:text-slate-600 transition-colors"><X className="w-8 h-8" /></button>
-                 <div className="flex items-center gap-8 mb-12 border-b border-slate-50 pb-10"><div className="w-24 h-24 bg-cedar-primary text-white rounded-[2rem] flex items-center justify-center font-black text-4xl uppercase">{studentDetail.name[0]}</div><div><h3 className="text-4xl font-serif text-slate-800 italic">{studentDetail.name}</h3><p className="text-slate-400 font-medium tracking-tight mt-1">{studentDetail.email} • {studentDetail.stars || 0} Total Stars</p></div></div>
+           <div className="fixed inset-0 bg-slate-950/60 backdrop-blur-md z-[600] flex items-center justify-center p-4 md:p-6">
+              <motion.div initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="bg-white rounded-[2rem] md:rounded-[4rem] w-full max-w-4xl p-8 md:p-12 shadow-2xl relative flex flex-col max-h-[90vh]">
+                 <button onClick={() => setStudentDetail(null)} className="absolute top-6 right-6 md:top-10 md:right-10 p-3 text-slate-300 hover:text-slate-600 transition-colors"><X className="w-8 h-8" /></button>
+                 <div className="flex items-center gap-6 md:gap-8 mb-8 md:mb-12 border-b border-slate-50 pb-8 md:pb-10"><div className="w-20 h-20 md:w-24 md:h-24 bg-cedar-primary text-white rounded-2xl md:rounded-[2rem] flex items-center justify-center font-black text-3xl md:text-4xl uppercase">{studentDetail.name[0]}</div><div><h3 className="text-3xl md:text-4xl font-serif text-slate-800 italic">{studentDetail.name}</h3><p className="text-slate-400 font-medium tracking-tight mt-1">{studentDetail.email} • {studentDetail.stars || 0} Total Stars</p></div></div>
                  <div className="flex-1 overflow-y-auto pr-4 custom-scrollbar">
                     <h4 className="text-sm font-black uppercase text-slate-400 tracking-widest mb-8 px-2 flex items-center gap-3">
                       <GraduationCap className="w-5 h-5" /> Assigned STAIR Path
@@ -616,10 +616,10 @@ function EducatorDashboardContent() {
         )}
 
         {lessonModal && (
-          <div className="fixed inset-0 bg-slate-950/60 backdrop-blur-md z-[400] flex items-center justify-center p-6">
-             <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="bg-white rounded-[4rem] w-full max-w-4xl p-12 lg:p-16 shadow-2xl relative max-h-[90vh] overflow-y-auto custom-scrollbar">
-                <button onClick={() => setLessonModal(null)} className="absolute top-10 right-10 p-3 text-slate-300 hover:text-slate-600 transition-colors"><X className="w-8 h-8" /></button>
-                <div className="mb-12"><h3 className="text-4xl font-serif text-slate-800 italic">{lessonModal.mode === 'create' ? 'Create STAIR Step' : 'Refine Journey Step'}</h3><p className="text-slate-400 font-medium mt-2">Design an impactful learning experience for your students.</p></div>
+          <div className="fixed inset-0 bg-slate-950/60 backdrop-blur-md z-[400] flex items-center justify-center p-4 md:p-6">
+             <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="bg-white rounded-[2rem] md:rounded-[4rem] w-full max-w-4xl p-8 md:p-12 lg:p-16 shadow-2xl relative max-h-[90vh] overflow-y-auto custom-scrollbar">
+                <button onClick={() => setLessonModal(null)} className="absolute top-6 right-6 md:top-10 md:right-10 p-3 text-slate-300 hover:text-slate-600 transition-colors"><X className="w-6 h-6 md:w-8 md:h-8" /></button>
+                <div className="mb-10 md:mb-12"><h3 className="text-3xl md:text-4xl font-serif text-slate-800 italic">{lessonModal.mode === 'create' ? 'Create STAIR Step' : 'Refine Journey Step'}</h3><p className="text-slate-400 font-medium mt-2">Design an impactful learning experience for your students.</p></div>
                 <form onSubmit={lessonModal.mode === 'create' ? handleCreateLessson : handleUpdateLesson} className="space-y-12">
                    <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
                       <div className="space-y-4"><label className="text-xs font-black uppercase text-slate-400 tracking-widest ml-1">Step Title</label><input required placeholder="e.g., The Forest Rhythm" value={lessonForm.title} onChange={e => setLessonForm({...lessonForm, title: e.target.value})} className="w-full bg-slate-50 border border-slate-100 rounded-3xl px-8 py-5 text-sm font-medium outline-none focus:ring-4 focus:ring-cedar-primary/5 transition-all" /></div>
@@ -792,7 +792,7 @@ function EducatorDashboardContent() {
                       <div className="space-y-4"><label className="text-xs font-black uppercase text-slate-400 tracking-widest ml-1">Deadline</label><input type="datetime-local" onClick={(e) => (e.target as any).showPicker?.()} value={lessonForm.deadline} onChange={e => setLessonForm({...lessonForm, deadline: e.target.value})} className="w-full bg-slate-50 border border-slate-100 rounded-3xl px-8 py-5 text-sm outline-none cursor-pointer" /></div>
                    </div>
 
-                   <button type="submit" className="w-full bg-cedar-primary text-white py-8 rounded-[3rem] text-xl font-bold shadow-2xl hover:scale-[1.01] transition-all">Launch Journey Step</button>
+                   <button type="submit" className="w-full bg-cedar-primary text-white py-5 md:py-8 rounded-2xl md:rounded-[3rem] text-lg md:text-xl font-bold shadow-2xl hover:scale-[1.01] transition-all">Launch Journey Step</button>
                 </form>
              </motion.div>
           </div>

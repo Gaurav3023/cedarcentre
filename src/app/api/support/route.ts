@@ -3,6 +3,7 @@ import dbConnect from '@/lib/dbConnect';
 import { SupportRequest, User } from '@/models/Schemas';
 import { sendEmail } from '@/lib/email';
 import { createNotification } from '@/lib/notifications';
+import { getAppUrl } from '@/lib/config';
 
 export async function GET() {
   try {
@@ -55,7 +56,7 @@ export async function POST(request: Request) {
             </div>
             <p>You can view and respond to this request in your educator dashboard.</p>
             <div style="text-align: center; margin: 35px 0;">
-              <a href="${process.env.NEXT_PUBLIC_APP_URL}/educator" class="button">Respond Now</a>
+              <a href="${getAppUrl()}/educator?tab=support" class="button">Respond Now</a>
             </div>
           `
         });
@@ -134,7 +135,7 @@ export async function PATCH(request: Request) {
               </div>
               <p>Log in to your dashboard to reply.</p>
               <div style="text-align: center; margin: 35px 0;">
-                <a href="${process.env.NEXT_PUBLIC_APP_URL}/${recipientRole}" class="button">View Message</a>
+                <a href="${getAppUrl()}/${recipientRole}?tab=support" class="button">View Message</a>
               </div>
             `
           });

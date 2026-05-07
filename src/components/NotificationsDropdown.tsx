@@ -44,9 +44,9 @@ export default function NotificationsDropdown() {
               initial={{ opacity: 0, y: 10, scale: 0.95 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: 10, scale: 0.95 }}
-              className="absolute right-0 mt-4 w-80 md:w-96 bg-white rounded-[2.5rem] shadow-2xl border border-slate-50 z-[160] overflow-hidden"
+              className="fixed sm:absolute top-24 sm:top-full left-4 right-4 sm:left-auto sm:right-0 sm:mt-4 sm:w-80 md:w-96 bg-white rounded-[2rem] md:rounded-[2.5rem] shadow-2xl border border-slate-50 z-[200] overflow-hidden"
             >
-              <div className="p-6 border-b border-slate-50 flex justify-between items-center bg-slate-50/50">
+              <div className="p-4 md:p-6 border-b border-slate-50 flex justify-between items-center bg-slate-50/50">
                 <div className="flex items-center gap-2">
                   <h3 className="font-serif text-lg text-slate-800">Notifications</h3>
                   {unreadCount > 0 && <span className="px-2 py-0.5 bg-cedar-primary/10 text-cedar-primary text-[8px] font-black rounded-full uppercase tracking-widest">{unreadCount} New</span>}
@@ -64,7 +64,7 @@ export default function NotificationsDropdown() {
                 </div>
               </div>
 
-              <div className="max-h-[400px] overflow-y-auto custom-scrollbar">
+              <div className="max-h-[60vh] md:max-h-[400px] overflow-y-auto custom-scrollbar">
                 {notifications.length === 0 ? (
                   <div className="p-12 text-center">
                     <div className="w-16 h-16 bg-slate-50 rounded-2xl flex items-center justify-center mx-auto mb-4">
@@ -84,7 +84,7 @@ export default function NotificationsDropdown() {
                             markNotificationAsRead(n.id);
                           }
                         }}
-                        className={`p-5 transition-all group relative ${!n.read ? 'bg-cedar-primary/5' : ''} ${n.link ? 'cursor-pointer hover:bg-slate-50' : ''}`}
+                        className={`p-4 md:p-5 transition-all group relative ${!n.read ? 'bg-cedar-primary/5' : ''} ${n.link ? 'cursor-pointer hover:bg-slate-50' : ''}`}
                       >
                         {!n.read && <div className="absolute left-0 top-0 bottom-0 w-1 bg-cedar-primary" />}
                         <div className="flex gap-4">

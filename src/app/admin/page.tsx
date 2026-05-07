@@ -148,7 +148,7 @@ export default function AdminDashboard() {
       <main className="flex-1 p-6 lg:p-12 overflow-y-auto max-w-[1600px] mx-auto w-full">
         <header className="mb-12">
             <p className="text-[10px] font-black uppercase text-cedar-primary tracking-[0.3em] mb-2">Platform Administration</p>
-            <h1 className="text-4xl lg:text-5xl font-serif text-slate-800 italic">
+            <h1 className="text-3xl md:text-4xl lg:text-5xl font-serif text-slate-800 italic">
               {activeTab === 'approvals' ? 'Registration Requests' : activeTab === 'assignments' ? 'Mentor Matching' : 'Member Directory'}
             </h1>
         </header>
@@ -161,7 +161,7 @@ export default function AdminDashboard() {
                initial={{ opacity: 0, y: 20 }}
                animate={{ opacity: 1, y: 0 }}
                transition={{ delay: i * 0.1 }}
-               className="bg-white p-8 rounded-[2.5rem] shadow-sm border border-slate-100 flex items-center gap-6 group hover:shadow-premium-hover transition-all"
+               className="bg-white p-6 md:p-8 rounded-3xl md:rounded-[2.5rem] shadow-sm border border-slate-100 flex items-center gap-6 group hover:shadow-premium-hover transition-all"
              >
                 <div className={`w-14 h-14 ${stat.bg} ${stat.color} rounded-2xl flex items-center justify-center group-hover:rotate-12 transition-transform`}>
                    <stat.icon className="w-7 h-7" />
@@ -183,7 +183,7 @@ export default function AdminDashboard() {
                  <span className="px-4 py-2 bg-amber-50 text-amber-600 rounded-xl text-[10px] font-black uppercase tracking-widest border border-amber-100">{pendingUsers.length} Waiting</span>
               </div>
               {pendingUsers.length === 0 ? (
-                 <div className="bg-white p-20 rounded-[3rem] text-center border-2 border-dashed border-slate-100">
+                 <div className="bg-white p-10 md:p-20 rounded-3xl md:rounded-[3rem] text-center border-2 border-dashed border-slate-100">
                     <div className="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-6">
                        <CheckCircle2 className="w-10 h-10 text-slate-200" />
                     </div>
@@ -197,7 +197,7 @@ export default function AdminDashboard() {
                     initial={{ opacity: 0, x: -20 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: i * 0.1 }}
-                    className="bg-white p-8 rounded-[3rem] shadow-sm flex flex-col md:flex-row justify-between items-center border border-slate-100 hover:border-cedar-primary/20 transition-all gap-8"
+                    className="bg-white p-6 md:p-8 rounded-[2rem] md:rounded-[3rem] shadow-sm flex flex-col md:flex-row justify-between items-center border border-slate-100 hover:border-cedar-primary/20 transition-all gap-8"
                   >
                     <div className="flex items-center gap-6 w-full md:w-auto">
                       <div className="w-20 h-20 bg-slate-50 text-slate-400 rounded-[1.5rem] flex items-center justify-center font-bold text-3xl uppercase shadow-inner">
@@ -223,9 +223,9 @@ export default function AdminDashboard() {
           )}
 
           {activeTab === 'assignments' && (
-            <div className="bg-white rounded-[3.5rem] shadow-sm border border-slate-100 overflow-hidden">
-              <div className="p-10 border-b border-slate-50 flex justify-between items-center">
-                 <h3 className="text-2xl font-serif text-slate-800">Student & Educator Pairing</h3>
+            <div className="bg-white rounded-[2rem] md:rounded-[3.5rem] shadow-sm border border-slate-100 overflow-hidden">
+              <div className="p-6 md:p-10 border-b border-slate-50 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                 <h3 className="text-xl md:text-2xl font-serif text-slate-800">Student & Educator Pairing</h3>
                  <div className="flex items-center gap-2 text-xs font-black uppercase text-slate-400 tracking-widest">
                     <Activity className="w-4 h-4 text-cedar-primary" /> System Matchmaking
                  </div>
@@ -294,7 +294,7 @@ export default function AdminDashboard() {
                           <div className="p-3 bg-cedar-primary/10 rounded-2xl">
                              <GraduationCap className="w-8 h-8 text-cedar-primary" />
                           </div>
-                          <h3 className="text-4xl font-serif text-slate-800 italic">Learners Community</h3>
+                          <h3 className="text-2xl md:text-4xl font-serif text-slate-800 italic">Learners Community</h3>
                        </div>
                        <p className="text-slate-400 font-medium ml-1">Manage active students and track their journey progress.</p>
                     </div>
@@ -323,7 +323,7 @@ export default function AdminDashboard() {
                         layout
                         initial={{ opacity: 0, scale: 0.95 }}
                         animate={{ opacity: 1, scale: 1 }}
-                        className="bg-white p-8 rounded-[3rem] shadow-sm border border-slate-100 hover:border-cedar-primary/20 transition-all group"
+                        className="bg-white p-6 md:p-8 rounded-[2rem] md:rounded-[3rem] shadow-sm border border-slate-100 hover:border-cedar-primary/20 transition-all group"
                       >
                          <div className="flex justify-between items-start mb-8">
                             <div className="w-16 h-16 bg-slate-50 rounded-2xl flex items-center justify-center font-bold text-2xl text-slate-400 group-hover:bg-cedar-primary group-hover:text-white transition-all shadow-inner uppercase">
@@ -358,7 +358,7 @@ export default function AdminDashboard() {
                           <div className="p-3 bg-emerald-50 rounded-2xl">
                              <Briefcase className="w-8 h-8 text-emerald-500" />
                           </div>
-                          <h3 className="text-4xl font-serif text-slate-800 italic">Professional Mentors</h3>
+                          <h3 className="text-2xl md:text-4xl font-serif text-slate-800 italic">Professional Mentors</h3>
                        </div>
                        <p className="text-slate-400 font-medium ml-1">Verified educators providing guidance and reviewing submissions.</p>
                     </div>
@@ -387,7 +387,7 @@ export default function AdminDashboard() {
                         layout
                         initial={{ opacity: 0, scale: 0.95 }}
                         animate={{ opacity: 1, scale: 1 }}
-                        className="bg-white p-8 rounded-[3rem] shadow-sm border border-slate-100 hover:border-emerald-200/50 transition-all group"
+                        className="bg-white p-6 md:p-8 rounded-[2rem] md:rounded-[3rem] shadow-sm border border-slate-100 hover:border-emerald-200/50 transition-all group"
                       >
                          <div className="flex justify-between items-start mb-8">
                             <div className="w-16 h-16 bg-emerald-50 text-emerald-400 rounded-2xl flex items-center justify-center font-bold text-2xl group-hover:bg-emerald-500 group-hover:text-white transition-all shadow-inner uppercase">
@@ -420,9 +420,9 @@ export default function AdminDashboard() {
 
       {/* Assignment Modal */}
       {assignmentModal && (
-        <div className="fixed inset-0 bg-slate-950/60 backdrop-blur-sm z-[200] flex items-center justify-center p-8">
-           <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="bg-white rounded-[3.5rem] w-full max-w-lg p-12 relative overflow-hidden shadow-2xl">
-              <h3 className="text-3xl font-serif text-slate-800 mb-4 italic">Match with Mentor</h3>
+        <div className="fixed inset-0 bg-slate-950/60 backdrop-blur-sm z-[200] flex items-center justify-center p-4 md:p-8">
+           <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="bg-white rounded-[2rem] md:rounded-[3.5rem] w-full max-w-lg p-8 md:p-12 relative overflow-hidden shadow-2xl">
+              <h3 className="text-2xl md:text-3xl font-serif text-slate-800 mb-4 italic">Match with Mentor</h3>
               <p className="text-slate-400 mb-10 text-sm font-medium">Connect this student with a professional guide.</p>
               
               <div className="space-y-3 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">

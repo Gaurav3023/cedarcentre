@@ -4,6 +4,7 @@ import { Submission, User, Lesson } from '@/models/Schemas';
 import { sendEmail } from '@/lib/email';
 import { createNotification } from '@/lib/notifications';
 import { getSession } from '@/lib/auth';
+import { getAppUrl } from '@/lib/config';
 
 export async function GET() {
   try {
@@ -61,7 +62,7 @@ export async function POST(request: Request) {
               </div>
               <p>You can review and grade this submission in your educator dashboard.</p>
               <div style="text-align: center; margin: 35px 0;">
-                <a href="${process.env.NEXT_PUBLIC_APP_URL}/educator" class="button">Review Submission</a>
+                <a href="${getAppUrl()}/educator" class="button">Review Submission</a>
               </div>
             `
           });
@@ -116,7 +117,7 @@ export async function PATCH(request: Request) {
           title: 'Work Graded!',
           message: `Your work for ${lesson?.title || 'your lesson'} has been reviewed and graded.`,
           type: 'grade',
-          link: '/student'
+          link: `/student/lesson/${existingSubmission.lessonId}`,
         });
 
         try {
@@ -133,7 +134,7 @@ export async function PATCH(request: Request) {
               </div>
               <p>Check your dashboard to see your updated star count and feedback.</p>
               <div style="text-align: center; margin: 35px 0;">
-                <a href="${process.env.NEXT_PUBLIC_APP_URL}/student" class="button">View Dashboard</a>
+                <a href="${getAppUrl()}/student/lesson/${existingSubmission.lessonId}" class="button">View Feedback</a>
               </div>
             `
           });

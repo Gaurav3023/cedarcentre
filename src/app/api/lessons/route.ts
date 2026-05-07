@@ -4,6 +4,7 @@ import { Lesson, User } from '@/models/Schemas';
 import { sendEmail } from '@/lib/email';
 import { createNotification } from '@/lib/notifications';
 import { getSession } from '@/lib/auth';
+import { getAppUrl } from '@/lib/config';
 
 export async function GET() {
   try {
@@ -60,7 +61,7 @@ export async function POST(request: Request) {
           title: 'New Content Posted',
           message: `Your educator has posted: ${newLesson.title}${weekLabel ? ` under ${weekLabel}` : ''}`,
           type: 'lesson',
-          link: `/student`, // Link to dashboard for general notification
+          link: `/student/lesson/${newLesson._id}`, 
           scheduledAt: releaseDate
         });
 
@@ -79,7 +80,7 @@ export async function POST(request: Request) {
               </div>
               <p>Log in to your dashboard to view the new material and start your journey.</p>
               <div style="text-align: center; margin: 35px 0;">
-                <a href="${process.env.NEXT_PUBLIC_APP_URL}/student" class="button">View New Content</a>
+                <a href="${getAppUrl()}/student/lesson/${newLesson._id}" class="button">View New Content</a>
               </div>
               <div class="divider"></div>
               <p style="color: #64748b; font-size: 14px;">Happy learning!</p>

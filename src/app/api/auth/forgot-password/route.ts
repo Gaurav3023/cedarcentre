@@ -3,6 +3,7 @@ import dbConnect from '@/lib/dbConnect';
 import { User } from '@/models/Schemas';
 import crypto from 'crypto';
 import { sendEmail } from '@/lib/email';
+import { getAppUrl } from '@/lib/config';
 
 export async function POST(request: Request) {
   try {
@@ -30,7 +31,7 @@ export async function POST(request: Request) {
     await user.save();
 
     // Send email using utility
-    const resetUrl = `${process.env.NEXT_PUBLIC_APP_URL}/reset-password?token=${resetToken}`;
+    const resetUrl = `${getAppUrl()}/reset-password?token=${resetToken}`;
     
     await sendEmail({
       to: user.email,

@@ -54,9 +54,9 @@ export default function JourneyMap() {
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
               transition={{ delay: idx * 0.1 }}
-              className={`flex items-center gap-8 relative z-10 ${isLocked ? 'opacity-40 grayscale' : 'opacity-100'}`}
+              className={`flex items-center gap-4 md:gap-8 relative z-10 ${isLocked ? 'opacity-40 grayscale' : 'opacity-100'}`}
             >
-              <div className={`w-20 h-20 rounded-[2.5rem] flex items-center justify-center border-4 transition-all duration-500 ${
+              <div className={`w-14 h-14 md:w-20 md:h-20 rounded-2xl md:rounded-[2.5rem] flex items-center justify-center border-2 md:border-4 transition-all duration-500 shrink-0 ${
                 isCompleted 
                 ? 'bg-cedar-primary text-white border-cedar-primary/20 shadow-lg' 
                 : isCurrent
@@ -64,21 +64,21 @@ export default function JourneyMap() {
                 : 'bg-slate-50 border-slate-100 text-slate-300'
               }`}>
                 {isCompleted ? (
-                   <CheckCircle2 className="w-10 h-10" />
+                   <CheckCircle2 className="w-6 h-6 md:w-10 md:h-10" />
                 ) : isLocked ? (
-                   <Lock className="w-8 h-8" />
+                   <Lock className="w-5 h-5 md:w-8 md:h-8" />
                 ) : (
-                   <act.icon className="w-10 h-10" />
+                   <act.icon className="w-6 h-6 md:w-10 md:h-10" />
                 )}
               </div>
               
-              <div className={`bg-white p-8 rounded-[2.5rem] shadow-premium flex-1 border border-slate-50 relative group transition-all ${!isLocked ? 'hover:border-cedar-primary/30 hover:translate-x-2' : ''}`}>
+              <div className={`bg-white p-5 md:p-8 rounded-[1.5rem] md:rounded-[2.5rem] shadow-premium flex-1 border border-slate-50 relative group transition-all ${!isLocked ? 'hover:border-cedar-primary/30 hover:translate-x-2' : ''}`}>
                 <div className="flex justify-between items-center">
                    <div>
                       <span className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] block mb-2">
                         Forest Step {act.id}
                       </span>
-                      <h4 className={`text-2xl font-serif ${isLocked ? 'text-slate-400' : 'text-slate-800'}`}>{act.title}</h4>
+                      <h4 className={`text-lg md:text-2xl font-serif ${isLocked ? 'text-slate-400' : 'text-slate-800'}`}>{act.title}</h4>
                    </div>
                    {!isLocked && (
                       <Link href="/student/forest-journey" className={`p-4 rounded-2xl transition-all ${isCompleted ? 'bg-green-50 text-green-500 hover:bg-green-500 hover:text-white' : 'bg-slate-50 text-slate-400 group-hover:bg-cedar-primary group-hover:text-white'}`}>

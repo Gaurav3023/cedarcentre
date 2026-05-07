@@ -43,7 +43,7 @@ export default function LessonDetailPage() {
   return (
     <RoleGuard allowedRoles="student">
     <div className="min-h-screen bg-cedar-background pb-20">
-      <header className="px-8 md:px-12 py-6 bg-white/60 backdrop-blur-xl border-b border-white/40 sticky top-0 z-50">
+      <header className="px-4 md:px-12 py-4 md:py-6 bg-white/60 backdrop-blur-xl border-b border-white/40 sticky top-0 z-50">
         <div className="max-w-6xl mx-auto flex justify-between items-center">
           <Link href="/student" className="flex items-center gap-3 text-slate-400 hover:text-cedar-primary transition-colors font-bold text-xs uppercase tracking-widest">
             <ArrowLeft className="w-5 h-5" /> Home
@@ -55,9 +55,9 @@ export default function LessonDetailPage() {
         </div>
       </header>
 
-      <main className="max-w-4xl mx-auto px-8 pt-20">
+      <main className="max-w-4xl mx-auto px-4 md:px-8 pt-10 md:pt-20">
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-16">
-           <div className="bg-white p-12 md:p-24 rounded-[4rem] shadow-premium relative overflow-hidden border border-slate-50">
+           <div className="bg-white p-8 md:p-16 lg:p-24 rounded-[2rem] md:rounded-[4rem] shadow-premium relative overflow-hidden border border-slate-50">
               <div className="flex justify-between items-start mb-10">
                  <span className="px-5 py-2 bg-cedar-aqua/20 text-cedar-primary rounded-full text-[10px] font-black uppercase tracking-widest">{lesson.type}</span>
                  {lesson.deadline && (
@@ -67,7 +67,7 @@ export default function LessonDetailPage() {
                  )}
               </div>
 
-              <h1 className="text-5xl md:text-7xl font-serif text-slate-800 leading-[1.1] mb-12">{lesson.title}</h1>
+              <h1 className="text-3xl md:text-5xl lg:text-7xl font-serif text-slate-800 leading-[1.1] mb-8 md:mb-12">{lesson.title}</h1>
 
                 {(() => {
                   const urls = lesson.resourceLinks || [];
@@ -95,7 +95,7 @@ export default function LessonDetailPage() {
                   return (
                     <>
                       {isVideo && (
-                        <div className="aspect-video bg-slate-900 rounded-[3.5rem] shadow-2xl mb-16 overflow-hidden relative border-8 border-slate-800">
+                        <div className="aspect-video bg-slate-900 rounded-[1.5rem] md:rounded-[3.5rem] shadow-2xl mb-12 md:mb-16 overflow-hidden relative border-4 md:border-8 border-slate-800">
                            <iframe 
                              className="w-full h-full"
                              src={embedUrl}
@@ -158,7 +158,7 @@ export default function LessonDetailPage() {
                })()}
            </div>
 
-           <div className="bg-white p-12 md:p-24 rounded-[4rem] shadow-[0_30px_60px_-15px_rgba(0,0,0,0.05)] relative border border-slate-50 overflow-hidden">
+           <div className="bg-white p-8 md:p-16 lg:p-24 rounded-[2rem] md:rounded-[4rem] shadow-[0_30px_60px_-15px_rgba(0,0,0,0.05)] relative border border-slate-50 overflow-hidden">
               <div className="flex items-center gap-8 mb-16">
                  <div className="w-20 h-20 bg-cedar-aqua/10 rounded-[2.5rem] flex items-center justify-center text-cedar-primary shadow-inner">
                     <FileUp className="w-10 h-10" />
@@ -170,11 +170,11 @@ export default function LessonDetailPage() {
               </div>
 
               {mySubmission ? (
-                <motion.div initial={{ scale: 0.98, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="p-16 bg-cedar-aqua/5 rounded-[4rem] border border-cedar-aqua/10 backdrop-blur-sm">
-                   <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-8 mb-12 border-b border-cedar-aqua/10 pb-12">
-                      <div className="flex items-center gap-5 text-cedar-primary font-bold text-2xl">
-                         <div className="w-14 h-14 bg-cedar-primary text-white rounded-2xl flex items-center justify-center shadow-lg shadow-cedar-primary/20">
-                            <CheckCircle className="w-8 h-8" />
+                <motion.div initial={{ scale: 0.98, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="p-8 md:p-16 bg-cedar-aqua/5 rounded-[2rem] md:rounded-[4rem] border border-cedar-aqua/10 backdrop-blur-sm">
+                   <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-8 mb-10 md:mb-12 border-b border-cedar-aqua/10 pb-10 md:pb-12">
+                      <div className="flex items-center gap-5 text-cedar-primary font-bold text-xl md:text-2xl">
+                         <div className="w-12 h-12 md:w-14 md:h-14 bg-cedar-primary text-white rounded-xl md:rounded-2xl flex items-center justify-center shadow-lg shadow-cedar-primary/20">
+                            <CheckCircle className="w-6 h-6 md:w-8 md:h-8" />
                          </div>
                          <div className="flex flex-col">
                             <span className="leading-none">Step Finalized</span>
@@ -182,34 +182,34 @@ export default function LessonDetailPage() {
                          </div>
                       </div>
                       {mySubmission.status === 'reviewed' ? (
-                        <div className="flex items-center gap-5 px-10 py-5 bg-white rounded-[2rem] shadow-premium border border-yellow-100">
-                           <div className="w-12 h-12 bg-yellow-400 rounded-xl flex items-center justify-center text-white">
-                              <Star className="w-6 h-6 fill-current" />
+                        <div className="flex items-center gap-4 md:gap-5 px-6 md:px-10 py-4 md:py-5 bg-white rounded-2xl md:rounded-[2rem] shadow-premium border border-yellow-100">
+                           <div className="w-10 h-10 md:w-12 md:h-12 bg-yellow-400 rounded-xl flex items-center justify-center text-white">
+                              <Star className="w-5 h-5 md:w-6 md:h-6 fill-current" />
                            </div>
                            <div className="flex flex-col">
-                              <span className="font-bold text-slate-800 text-xl">Reward Claimed</span>
+                              <span className="font-bold text-slate-800 text-lg md:text-xl">Reward Claimed</span>
                               <span className="text-[10px] font-black uppercase tracking-widest text-yellow-600">{mySubmission.rewardStars} Growth Stars Earned</span>
                            </div>
                         </div>
                       ) : (
-                        <div className="px-8 py-4 bg-white/80 rounded-[2rem] text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 border border-slate-100 flex items-center gap-3">
+                        <div className="px-6 py-3 md:px-8 md:py-4 bg-white/80 rounded-2xl md:rounded-[2rem] text-[9px] md:text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 border border-slate-100 flex items-center gap-3">
                            <Clock className="w-4 h-4" /> Awaiting Educator Feedback
                         </div>
                       )}
                    </div>
 
-                   <div className="space-y-10">
+                   <div className="space-y-8 md:space-y-10">
                       {mySubmission.feedback && (
-                        <div className="p-10 bg-white rounded-[3rem] border border-cedar-primary/10 shadow-sm relative">
-                           <span className="absolute -top-4 left-10 px-4 py-1 bg-cedar-primary text-white text-[8px] font-black uppercase tracking-widest rounded-full">Guide&apos;s Voice</span>
-                           <p className="text-slate-700 italic leading-relaxed text-xl">&quot;{mySubmission.feedback}&quot;</p>
+                        <div className="p-6 md:p-10 bg-white rounded-[1.5rem] md:rounded-[3rem] border border-cedar-primary/10 shadow-sm relative">
+                           <span className="absolute -top-3 left-6 md:-top-4 md:left-10 px-3 md:px-4 py-1 bg-cedar-primary text-white text-[7px] md:text-[8px] font-black uppercase tracking-widest rounded-full">Guide&apos;s Voice</span>
+                           <p className="text-slate-700 italic leading-relaxed text-lg md:text-xl">&quot;{mySubmission.feedback}&quot;</p>
                         </div>
                       )}
                       
                       <div className="space-y-6">
                          <label className="text-[10px] font-black uppercase text-cedar-primary tracking-[0.3em] ml-2">My Insight</label>
-                         <div className="p-12 bg-white/80 rounded-[3rem] shadow-inner border border-white italic text-slate-600 text-lg leading-relaxed relative">
-                            <span className="absolute -top-4 -left-2 text-7xl text-cedar-aqua/20 font-serif opacity-30 px-3">&quot;</span>
+                         <div className="p-8 md:p-12 bg-white/80 rounded-[1.5rem] md:rounded-[3rem] shadow-inner border border-white italic text-slate-600 text-base md:text-lg leading-relaxed relative">
+                            <span className="absolute -top-3 md:-top-4 -left-1 md:-left-2 text-5xl md:text-7xl text-cedar-aqua/20 font-serif opacity-30 px-3">&quot;</span>
                             {mySubmission.content}
                          </div>
                       </div>
@@ -246,7 +246,7 @@ export default function LessonDetailPage() {
                         required
                         value={workText}
                         onChange={(e) => setWorkText(e.target.value)}
-                        className="w-full min-h-[350px] p-12 bg-slate-50/50 border-2 border-slate-100 rounded-[3rem] text-xl leading-relaxed outline-none focus:bg-white focus:border-cedar-aqua/30 focus:ring-[15px] focus:ring-cedar-aqua/5 transition-all shadow-inner resize-none placeholder:text-slate-300 font-serif" 
+                        className="w-full min-h-[250px] md:min-h-[350px] p-8 md:p-12 bg-slate-50/50 border-2 border-slate-100 rounded-[2rem] md:rounded-[3rem] text-lg md:text-xl leading-relaxed outline-none focus:bg-white focus:border-cedar-aqua/30 focus:ring-[15px] focus:ring-cedar-aqua/5 transition-all shadow-inner resize-none placeholder:text-slate-300 font-serif" 
                         placeholder="I learned that..." 
                       />
                    </div>
@@ -256,7 +256,7 @@ export default function LessonDetailPage() {
                          <label className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400">Artifact Collection</label>
                          <span className="text-[10px] font-bold text-slate-300">Links & Digital Proof&hellip;</span>
                       </div>
-                      <div className="bg-slate-50/50 p-10 rounded-[4rem] border-2 border-slate-100 grid lg:grid-cols-2 gap-10">
+                      <div className="bg-slate-50/50 p-6 md:p-10 rounded-[2rem] md:rounded-[4rem] border-2 border-slate-100 grid lg:grid-cols-2 gap-8 md:gap-10">
                          <div className="space-y-6">
                             <h4 className="text-xs font-bold text-slate-400 ml-1">Links</h4>
                             <div className="space-y-3">
@@ -323,7 +323,7 @@ export default function LessonDetailPage() {
                    </div>
 
                    <div className="pt-16 border-t border-slate-100 flex justify-center">
-                      <button type="submit" disabled={submitting} className="group relative bg-cedar-primary px-24 py-8 rounded-[2.5rem] shadow-[0_30px_60px_-15px_rgba(45,123,138,0.4)] hover:shadow-[0_40px_80px_-15px_rgba(45,123,138,0.6)] hover:translate-y-[-5px] active:translate-y-[2px] transition-all overflow-hidden w-full md:w-auto min-w-[400px]">
+                      <button type="submit" disabled={submitting} className="group relative bg-cedar-primary px-8 md:px-24 py-6 md:py-8 rounded-[1.5rem] md:rounded-[2.5rem] shadow-[0_30px_60px_-15px_rgba(45,123,138,0.4)] hover:shadow-[0_40px_80px_-15px_rgba(45,123,138,0.6)] hover:translate-y-[-5px] active:translate-y-[2px] transition-all overflow-hidden w-full md:w-auto md:min-w-[400px]">
                          <div className="relative z-10 flex items-center justify-center gap-5 text-white font-serif text-2xl">
                             {submitting ? (
                               <span className="animate-pulse flex items-center gap-4"><Sparkles className="w-6 h-6 animate-spin" /> Recording Insight...</span>

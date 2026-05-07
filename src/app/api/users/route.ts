@@ -3,6 +3,7 @@ import dbConnect from '@/lib/dbConnect';
 import { User } from '@/models/Schemas';
 import { sendEmail } from '@/lib/email';
 import { createNotification } from '@/lib/notifications';
+import { getAppUrl } from '@/lib/config';
 
 export async function GET() {
   try {
@@ -54,7 +55,7 @@ export async function PATCH(request: Request) {
           <p>We are happy to inform you that your Cedar Centre account has been approved by the administrator.</p>
           <p>Your account is now ready to use. You can log in using your email and password.</p>
           <div style="text-align: center; margin: 35px 0;">
-            <a href="${process.env.NEXT_PUBLIC_APP_URL}/login" class="button">Log In Now</a>
+            <a href="${getAppUrl()}/login" class="button">Log In Now</a>
           </div>
           <div class="divider"></div>
           <p style="color: #64748b; font-size: 14px;">Welcome to our community! We look forward to supporting you on your journey.</p>

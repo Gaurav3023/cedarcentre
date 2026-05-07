@@ -49,14 +49,14 @@ export default function GlobalNavbar() {
       {/* Sticky Safe Exit Button */}
       <button 
         onClick={handleSafeExit}
-        className="fixed bottom-8 right-8 z-[1000] bg-[#E57E6B] text-white px-8 py-4 rounded-full font-black uppercase tracking-[0.2em] shadow-2xl hover:scale-110 active:scale-95 transition-all flex items-center gap-3"
+        className="fixed bottom-4 right-4 md:bottom-8 md:right-8 z-[1000] bg-[#E57E6B] text-white px-4 py-3 md:px-8 md:py-4 rounded-full font-black uppercase tracking-[0.2em] shadow-2xl hover:scale-110 active:scale-95 transition-all flex items-center gap-2 md:gap-3 text-[10px] md:text-base"
       >
-        <ShieldAlert className="w-5 h-5" />
+        <ShieldAlert className="w-4 h-4 md:w-5 md:h-5" />
         Safe Exit
       </button>
 
-      <header className={`fixed top-0 w-full z-[500] transition-all duration-500 ${scrolled ? 'bg-white shadow-xl py-3' : 'bg-transparent py-6'}`}>
-        <div className="max-w-7xl mx-auto px-8 flex justify-between items-center">
+      <header className={`fixed top-0 w-full z-[500] transition-all duration-500 ${scrolled ? 'bg-white shadow-xl py-3' : 'bg-transparent py-4 md:py-6'}`}>
+        <div className="max-w-7xl mx-auto px-4 md:px-8 flex justify-between items-center">
           
           <div className="flex items-center gap-12">
             <Link href="/" className="shrink-0">
@@ -113,8 +113,8 @@ export default function GlobalNavbar() {
           <div className="flex items-center gap-4">
              <button className="p-3 text-slate-400 hover:text-[#006180] transition-colors"><Search className="w-5 h-5" /></button>
              <Link href="/donate" className="bg-[#006180] text-white px-8 py-3 rounded-full text-xs font-black uppercase tracking-widest shadow-xl hover:bg-[#004a63] transition-all hidden md:block">Donate</Link>
-             <Link href="/login" className="flex items-center gap-2 bg-slate-900 text-white px-8 py-3 rounded-full text-xs font-black uppercase tracking-widest hover:scale-105 transition-all">
-                <LogIn className="w-4 h-4" /> Member Login
+             <Link href="/login" className="flex items-center gap-2 bg-slate-900 text-white px-4 md:px-8 py-2 md:py-3 rounded-full text-[10px] md:text-xs font-black uppercase tracking-widest hover:scale-105 transition-all shrink-0">
+                <LogIn className="w-4 h-4" /> <span className="hidden xs:inline">Member Login</span><span className="xs:hidden">Login</span>
              </Link>
              <button onClick={() => setMobileMenu(!mobileMenu)} className="xl:hidden p-2 text-slate-800"><Menu /></button>
           </div>
@@ -123,9 +123,9 @@ export default function GlobalNavbar() {
         {/* Mobile Menu */}
         <AnimatePresence>
           {mobileMenu && (
-            <motion.div initial={{ opacity: 0, x: '100%' }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: '100%' }} className="fixed inset-0 bg-white z-[600] flex flex-col p-12">
-               <button onClick={() => setMobileMenu(false)} className="self-end p-4"><X className="w-8 h-8" /></button>
-               <div className="flex flex-col gap-8 mt-12">
+            <motion.div initial={{ opacity: 0, x: '100%' }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: '100%' }} className="fixed inset-0 bg-white z-[600] flex flex-col p-6 md:p-12">
+               <button onClick={() => setMobileMenu(false)} className="self-end p-2"><X className="w-8 h-8" /></button>
+               <div className="flex flex-col gap-6 md:gap-8 mt-8 md:mt-12">
                   <MobileNavItem label="About Us" href="/about/who-we-are" />
                   <MobileNavItem label="Programs" href="/services" />
                   <MobileNavItem label="CYAC" href="/child-youth-advocacy" />

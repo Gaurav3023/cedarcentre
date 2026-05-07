@@ -161,12 +161,12 @@ function DashboardContent() {
   return (
     <RoleGuard allowedRoles="student">
       <div className="min-h-screen bg-[#FDFDFD]">
-        <header className="px-6 md:px-12 py-5 flex justify-between items-center bg-white/80 backdrop-blur-md sticky top-0 z-[100] border-b border-slate-100 shadow-sm">
+        <header className="px-4 md:px-12 py-4 md:py-5 flex justify-between items-center bg-white/80 backdrop-blur-md sticky top-0 z-[100] border-b border-slate-100 shadow-sm">
           <div className="flex items-center gap-4">
             <button onClick={() => setIsMobileMenuOpen(true)} className="lg:hidden p-3 bg-white hover:bg-slate-50 text-slate-400 transition-all rounded-2xl shadow-sm border border-slate-100 mr-2"><Menu className="w-5 h-5" /></button>
             <Link href="/"><img src="https://cedarcentre.ca/wp-content/uploads/2023/07/cedar-logo1.svg" className="h-12 md:h-14 hover:scale-105 transition-transform" alt="Logo" /></Link>
             <div className="h-8 w-[1px] bg-slate-100 hidden sm:block" />
-            <div className="hidden sm:block">
+            <div className="hidden lg:block">
                <p className="font-black text-[9px] uppercase tracking-[0.2em] text-cedar-primary leading-none">Cedar Centre</p>
                <p className="font-serif italic text-xs text-slate-400 mt-1">STAIR Platform</p>
             </div>
@@ -213,7 +213,7 @@ function DashboardContent() {
               <motion.div 
                 initial={{ opacity: 0, y: 20 }} 
                 animate={{ opacity: 1, y: 0 }} 
-                className="relative p-12 md:p-16 rounded-[4rem] shadow-premium overflow-hidden group border border-white bg-white"
+                className="relative p-8 md:p-16 rounded-[2.5rem] md:rounded-[4rem] shadow-premium overflow-hidden group border border-white bg-white"
               >
                  {/* Vibrant Shifting Rainbow Background */}
                  <motion.div 
@@ -261,10 +261,10 @@ function DashboardContent() {
                     >
                       <Sparkles className="w-4 h-4 animate-pulse" /><span>Warrior in Progress</span>
                     </motion.div>
-                    <h2 className="text-5xl md:text-6xl font-serif text-slate-800 mb-6 leading-tight italic">
+                    <h2 className="text-4xl md:text-6xl font-serif text-slate-800 mb-6 leading-tight italic">
                       Hello, <span className="text-transparent bg-clip-text bg-gradient-to-r from-cedar-primary via-cedar-aqua to-cedar-primary bg-[length:200%_auto] animate-pulse">{user?.name.split(' ')[0]}</span>
                     </h2>
-                    <p className="text-xl md:text-2xl text-slate-500 max-w-md leading-relaxed font-medium mb-8">Ready for your next STAIR step?</p>
+                    <p className="text-lg md:text-2xl text-slate-500 max-w-md leading-relaxed font-medium mb-8">Ready for your next STAIR step?</p>
                     
                     {/* Rotating Inspiration Quote */}
                     <motion.div 
@@ -294,7 +294,7 @@ function DashboardContent() {
               <section className="space-y-16">
                  <div className="px-4 flex flex-col md:flex-row md:items-center justify-between gap-6">
                     <div>
-                       <h3 className="text-4xl font-serif text-slate-800 italic">Your STAIR Path</h3>
+                       <h3 className="text-3xl md:text-4xl font-serif text-slate-800 italic">Your STAIR Path</h3>
                        <p className="text-slate-400 mt-2 font-medium italic">Guided phases to support your growth.</p>
                     </div>
                     <div className="flex items-center gap-4">
@@ -351,7 +351,7 @@ function DashboardContent() {
                                    const colorClass = isOverdue ? 'bg-red-50 border-red-100 text-red-600' : isDueSoon ? 'bg-amber-50 border-amber-100 text-amber-600' : cardColors[idx % cardColors.length];
                                    
                                    return viewMode === 'grid' ? (
-                                     <motion.div key={lesson.id} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: idx * 0.05 }} className={`p-10 rounded-[3.5rem] border shadow-premium hover:shadow-premium-hover transition-all group flex flex-col relative overflow-hidden ${isCompleted ? 'bg-slate-50/50 border-slate-100 grayscale opacity-60' : `${colorClass.split(' ')[0]} ${colorClass.split(' ')[1]}`}`}>
+                                     <motion.div key={lesson.id} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: idx * 0.05 }} className={`p-8 md:p-10 rounded-[2.5rem] md:rounded-[3.5rem] border shadow-premium hover:shadow-premium-hover transition-all group flex flex-col relative overflow-hidden ${isCompleted ? 'bg-slate-50/50 border-slate-100 grayscale opacity-60' : `${colorClass.split(' ')[0]} ${colorClass.split(' ')[1]}`}`}>
                                          {!isRead && !isCompleted && <div className="absolute top-0 left-0 p-5 bg-cedar-primary text-white text-[8px] font-black uppercase tracking-widest rounded-br-[2rem] z-20 shadow-lg">New</div>}
                                         {isOverdue && <div className="absolute top-0 right-0 p-5 bg-red-600 text-white text-[10px] font-black uppercase tracking-widest rounded-bl-[2rem] flex items-center gap-2 shadow-lg z-10 animate-pulse"><AlertCircle className="w-4 h-4" /> Overdue</div>}
                                         {isDueSoon && <div className="absolute top-0 right-0 p-5 bg-amber-500 text-white text-[10px] font-black uppercase tracking-widest rounded-bl-[2rem] flex items-center gap-2 shadow-lg z-10"><Clock className="w-4 h-4" /> Due Soon</div>}
@@ -399,8 +399,8 @@ function DashboardContent() {
                     </div>
                  )}
               </section>
-              <section className="bg-slate-50/30 border-2 border-dashed border-slate-100 p-12 md:p-16 rounded-[5rem] transition-colors hover:bg-white hover:border-cedar-aqua/20">
-                <div className="mb-14 flex flex-col md:flex-row md:items-center justify-between gap-6"><div><h3 className="text-3xl font-serif text-slate-800 flex items-center gap-4 italic"><Compass className="text-cedar-primary w-8 h-8" />The Forest Journey</h3><p className="text-slate-400 font-medium mt-2">See how far your courage has taken you.</p></div><span className="px-6 py-3 bg-white border border-slate-100 text-cedar-primary text-[10px] font-black uppercase tracking-widest rounded-2xl shadow-sm">Currently Phase {currentPhase} / 12</span></div>
+              <section className="bg-slate-50/30 border-2 border-dashed border-slate-100 p-8 md:p-16 rounded-[2.5rem] md:rounded-[5rem] transition-colors hover:bg-white hover:border-cedar-aqua/20">
+                <div className="mb-14 flex flex-col md:flex-row md:items-center justify-between gap-6"><div><h3 className="text-2xl md:text-3xl font-serif text-slate-800 flex items-center gap-4 italic"><Compass className="text-cedar-primary w-8 h-8" />The Forest Journey</h3><p className="text-slate-400 font-medium mt-2">See how far your courage has taken you.</p></div><span className="px-6 py-3 bg-white border border-slate-100 text-cedar-primary text-[10px] font-black uppercase tracking-widest rounded-2xl shadow-sm">Phase {currentPhase} / 12</span></div>
                 <JourneyMap />
               </section>
             </div>
@@ -409,9 +409,9 @@ function DashboardContent() {
         </main>
         <AnimatePresence>
           {showSupportModal && (
-            <div className="fixed inset-0 bg-slate-950/40 backdrop-blur-sm z-[200] flex items-center justify-center p-6">
-               <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} className="bg-white rounded-[3.5rem] w-full max-w-2xl p-10 relative overflow-hidden shadow-2xl flex flex-col min-h-[500px]">
-                  <button onClick={() => { setShowSupportModal(false); setSelectedRequestId(null); }} className="absolute top-8 right-8 p-3 hover:bg-slate-100 rounded-full transition-colors z-[10]"><X className="w-8 h-8 text-slate-400" /></button>
+            <div className="fixed inset-0 bg-slate-950/40 backdrop-blur-sm z-[200] flex items-center justify-center p-4 md:p-6">
+               <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} className="bg-white rounded-[2rem] md:rounded-[3.5rem] w-full max-w-2xl p-6 md:p-10 relative overflow-hidden shadow-2xl flex flex-col min-h-[500px]">
+                  <button onClick={() => { setShowSupportModal(false); setSelectedRequestId(null); }} className="absolute top-6 right-6 md:top-8 md:right-8 p-3 hover:bg-slate-100 rounded-full transition-colors z-[10]"><X className="w-6 h-6 md:w-8 md:h-8 text-slate-400" /></button>
                   {!selectedRequestId ? (
                      <div className="flex-1 flex flex-col">
                         <div className="text-center mb-10"><div className="w-16 h-16 bg-red-50 text-red-500 rounded-2xl flex items-center justify-center mx-auto mb-6"><MessageCircle className="w-8 h-8" /></div><h3 className="text-3xl font-serif text-slate-800">Support Center</h3><p className="text-slate-500 text-sm font-medium">Connect with your guide for assistance.</p></div>
