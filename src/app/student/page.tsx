@@ -12,7 +12,7 @@ import { useSearchParams } from "next/navigation";
 import NotificationsDropdown from "@/components/NotificationsDropdown";
 import { inspirationalQuotes } from "@/data/quotes";
 
-export default function StudentDashboard() {
+function StudentDashboardContent() {
   const { user, users, lessons, markLessonAsRead, getLessonsForStudent, sendSupportRequest, sendSupportChatMessage, markSupportAsRead, supportRequests, submissions, logout } = useAuth();
   const searchParams = useSearchParams();
   
@@ -715,3 +715,11 @@ const ResourceCard = React.memo(({ href, icon, title, desc, color }: { href: str
 });
 
 ResourceCard.displayName = 'ResourceCard';
+
+export default function StudentDashboard() {
+  return (
+    <React.Suspense fallback={<div className="h-screen flex items-center justify-center bg-slate-50"><div className="w-8 h-8 border-4 border-cedar-primary border-t-transparent rounded-full animate-spin"></div></div>}>
+      <StudentDashboardContent />
+    </React.Suspense>
+  );
+}
