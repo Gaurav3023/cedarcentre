@@ -3,6 +3,8 @@ import dbConnect from '@/lib/dbConnect';
 import { User, Lesson, Submission, SupportRequest, Notification } from '@/models/Schemas';
 import { getSession } from '@/lib/auth';
 
+export const dynamic = 'force-dynamic';
+
 export async function GET() {
   try {
     await dbConnect();

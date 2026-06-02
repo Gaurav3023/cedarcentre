@@ -33,7 +33,7 @@ const StatCard = React.memo(({ icon, label, value, color }: { icon: React.ReactN
 });
 StatCard.displayName = 'StatCard';
 
-export default function EducatorDashboard() {
+function EducatorDashboardContent() {
   const { user, users, lessons, createLesson, updateLesson, deleteLesson, submissions, rewardSubmission, supportRequests, resolveSupport, sendSupportChatMessage, markSupportAsRead, logout } = useAuth();
   const searchParams = useSearchParams();
   const [activeTab, setActiveTab] = useState<'dashboard' | 'lessons' | 'students' | 'submissions' | 'support'>('dashboard');
@@ -849,5 +849,13 @@ export default function EducatorDashboard() {
       </div>
     </div>
     </RoleGuard>
+  );
+}
+
+export default function EducatorDashboard() {
+  return (
+    <React.Suspense fallback={<div className="h-screen flex items-center justify-center bg-slate-50"><div className="w-8 h-8 border-4 border-cedar-primary border-t-transparent rounded-full animate-spin"></div></div>}>
+      <EducatorDashboardContent />
+    </React.Suspense>
   );
 }
