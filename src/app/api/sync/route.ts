@@ -39,8 +39,13 @@ export async function GET() {
       SupportRequest.find(isEducator ? { educatorId: userId } : { studentId: userId }),
 
       // Notifications: Only for current user AND already scheduled (or no schedule set)
+      // If the user is an admin, restrict notifications to exclude submission work and account approvals
       Notification.find({ 
         userId, 
+        ...(isAdmin ? {
+          type: { $ne: 'submission' },
+          title: { $nin: ['Account Approved!', 'Step Completed'] }
+        } : {}),
         $or: [
           { scheduledAt: { $lte: new Date() } },
           { scheduledAt: { $exists: false } }
