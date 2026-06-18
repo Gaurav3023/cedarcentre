@@ -14,9 +14,9 @@ export async function POST(request: Request) {
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
 
-    // Create a unique filename
-    const fileExtension = file.name.split('.').pop();
-    const fileName = `${crypto.randomUUID()}.${fileExtension}`;
+    // Create a unique filename while preserving the original name
+    const safeOriginalName = file.name.replace(/[^a-zA-Z0-9.-]/g, '_');
+    const fileName = `${crypto.randomUUID()}---${safeOriginalName}`;
     const path = join(process.cwd(), 'public/uploads', fileName);
 
     await writeFile(path, buffer);

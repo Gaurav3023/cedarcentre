@@ -41,11 +41,11 @@ export default function LoginPage() {
         <motion.div 
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="relative z-10 text-white max-w-lg"
+          className="relative z-10 text-white max-w-lg flex flex-col items-center text-center"
         >
-          <img src="https://cedarcentre.ca/wp-content/uploads/2023/07/cedar-logo1.svg" alt="Cedar" className="h-32 mb-12 grayscale invert brightness-0 invert" />
+          <img src="https://cedarcentre.ca/wp-content/uploads/2023/07/cedar-logo1.svg" alt="Cedar" className="h-44 mb-10" />
           <h2 className="text-6xl font-serif mb-8 leading-tight">Healing Begins in a Safe Space.</h2>
-          <p className="text-cedar-aqua text-xl opacity-90 leading-relaxed font-medium">Welcome to the STAIR Program. Your journey and privacy are our priority.</p>
+          <p className="text-white/90 text-xl opacity-90 leading-relaxed font-medium">Welcome to the STAIR Program. Your journey and privacy are our priority.</p>
         </motion.div>
       </div>
 

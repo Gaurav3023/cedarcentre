@@ -25,10 +25,13 @@ async function dbConnect() {
   if (!cached.promise) {
     const opts = {
       bufferCommands: false,
+      maxPoolSize: 10,           // Keep up to 10 connections warm
+      serverSelectionTimeoutMS: 5000,  // Fail fast if Atlas is unreachable
+      socketTimeoutMS: 20000,    // Cut slow queries at 20s
+      connectTimeoutMS: 10000,   // Initial handshake timeout
     };
 
     cached.promise = mongoose.connect(MONGODB_URI, opts).then((mongoose) => {
-      console.log("✅ Successfully connected to MongoDB Atlas");
       return mongoose;
     });
   }

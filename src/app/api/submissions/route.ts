@@ -29,7 +29,17 @@ export async function POST(request: Request) {
       subData.studentId = session.user.id;
     }
 
-    const newSubmission = await Submission.create(subData);
+    const defaultRewardStars = 5;
+    const newSubmissionData = {
+      ...subData,
+      status: 'reviewed',
+      rewardStars: defaultRewardStars,
+      content: subData.content || 'Completed' // Provide a default content if empty
+    };
+    const newSubmission = await Submission.create(newSubmissionData);
+
+    // Auto-update student stars
+    await User.findByIdAndUpdate(subData.studentId, { $inc: { stars: defaultRewardStars } });
 
     // Notify educator about new submission
     try {
@@ -41,34 +51,16 @@ export async function POST(request: Request) {
         if (educator) {
           await createNotification({
             userId: educator._id.toString(),
-            title: 'New Work Submission',
-            message: `${student.name} submitted work for ${lesson?.title || 'a lesson'}`,
+            title: 'Step Completed',
+            message: `${student.name} completed ${lesson?.title || 'a lesson'}`,
             type: 'submission',
             link: '/educator'
           });
-
-          const weekInfo = lesson?.weekNumber ? `Week ${lesson.weekNumber}` : '';
-          await sendEmail({
-            to: educator.email,
-            subject: `New Work Submission: ${student.name}`,
-            html: `
-              <h2 style="color: #1e293b; margin-top: 0;">New Work Submission</h2>
-              <p>Hi ${educator.name},</p>
-              <p><strong>${student.name}</strong> has just submitted work for <strong>${lesson?.title || 'a lesson'}</strong> ${weekInfo ? `(${weekInfo})` : ''}.</p>
-              <div style="background-color: #f1f5f9; padding: 20px; border-radius: 12px; margin: 25px 0;">
-                <p style="margin: 0;"><strong>Lesson:</strong> ${lesson?.title || 'N/A'}</p>
-                <p style="margin: 5px 0 0 0;"><strong>Student:</strong> ${student.name}</p>
-              </div>
-              <p>You can review and grade this submission in your educator dashboard.</p>
-              <div style="text-align: center; margin: 35px 0;">
-                <a href="${process.env.NEXT_PUBLIC_APP_URL}/educator" class="button">Review Submission</a>
-              </div>
-            `
-          });
+          // Email to educator intentionally disabled — notifications only
         }
       }
-    } catch (emailError) {
-      console.error("Error sending submission notification email:", emailError);
+    } catch (notifyError) {
+      console.error("Error sending submission notification:", notifyError);
     }
 
     return NextResponse.json(newSubmission);

@@ -6,7 +6,7 @@ import { Trees, Compass, Heart, LogOut, Sun, Cloud, Book, PlayCircle, Star, Spar
 import MoodCheckIn from "@/components/MoodCheckIn";
 import JourneyMap from "@/components/JourneyMap";
 import Link from "next/link";
-import React, { useState, useEffect, useMemo, useCallback } from "react";
+import React, { useState, useEffect, useMemo, useCallback, Suspense } from "react";
 import RoleGuard from "@/components/RoleGuard";
 import { useSearchParams } from "next/navigation";
 import NotificationsDropdown from "@/components/NotificationsDropdown";
@@ -155,7 +155,6 @@ function StudentDashboardContent() {
          <div className="grid grid-cols-1 gap-4">
             <ResourceCard href="/student/safe-space" icon={<Cloud className="text-blue-400" />} title="Breathing rhythms" desc="Find your center" color="hover:border-blue-200" />
             <ResourceCard href="/student/affirmations" icon={<Sun className="text-amber-500" />} title="Safe Affirmations" desc="Gentle daily reminders" color="hover:border-amber-200" />
-            <ResourceCard href="/student/journal" icon={<Book className="text-indigo-400" />} title="Reflective Journal" desc="Safe space for thoughts" color="hover:border-indigo-200" />
          </div>
       </div>
     </div>
@@ -258,12 +257,7 @@ function StudentDashboardContent() {
 
 
                  <div className="relative z-10">
-                    <motion.div 
-                      whileHover={{ scale: 1.05 }}
-                      className="inline-flex items-center gap-2 px-5 py-2 bg-cedar-aqua/20 text-cedar-primary rounded-full text-[10px] font-black uppercase tracking-widest mb-8 cursor-default shadow-sm border border-cedar-aqua/10"
-                    >
-                      <Sparkles className="w-4 h-4 animate-pulse" /><span>Warrior in Progress</span>
-                    </motion.div>
+
                     <h2 className="text-5xl md:text-6xl font-serif text-slate-800 mb-6 leading-tight italic">
                       Hello, <span className="text-transparent bg-clip-text bg-gradient-to-r from-cedar-primary via-cedar-aqua to-cedar-primary bg-[length:200%_auto] animate-pulse">{user?.name.split(' ')[0]}</span>
                     </h2>
@@ -315,18 +309,7 @@ function StudentDashboardContent() {
                              <List className="w-5 h-5" />
                           </button>
                        </div>
-                       {myEducator && (
-                          <div className="flex items-center gap-4 px-6 py-4 bg-white rounded-[2rem] border border-slate-100 shadow-sm hover:shadow-premium transition-all group">
-                             <div className="w-12 h-12 bg-cedar-primary text-white rounded-2xl flex items-center justify-center text-xs font-black shadow-lg shadow-cedar-primary/10 group-hover:scale-110 transition-transform">
-                                {myEducator.name[0]}
-                             </div>
-                             <div>
-                                <p className="text-[9px] font-black uppercase text-cedar-primary tracking-[0.2em] leading-none mb-1.5">Your Coach</p>
-                                <p className="text-sm font-bold text-slate-700">{myEducator.name}</p>
-                                <p className="text-[10px] text-slate-400 font-medium mt-1">{myEducator.email}</p>
-                             </div>
-                          </div>
-                       )}
+
                     </div>
                  </div>
 
@@ -424,10 +407,7 @@ function StudentDashboardContent() {
                     </div>
                  )}
               </section>
-              <section className="bg-slate-50/30 border-2 border-dashed border-slate-100 p-12 md:p-16 rounded-[5rem] transition-colors hover:bg-white hover:border-cedar-aqua/20">
-                <div className="mb-14 flex flex-col md:flex-row md:items-center justify-between gap-6"><div><h3 className="text-3xl font-serif text-slate-800 flex items-center gap-4 italic"><Compass className="text-cedar-primary w-8 h-8" />The Forest Journey</h3><p className="text-slate-400 font-medium mt-2">See how far your courage has taken you.</p></div><span className="px-6 py-3 bg-white border border-slate-100 text-cedar-primary text-[10px] font-black uppercase tracking-widest rounded-2xl shadow-sm">Currently Phase {currentPhase} / 12</span></div>
-                <JourneyMap />
-              </section>
+
             </div>
             <aside className="space-y-12 lg:sticky lg:top-32 h-fit hidden lg:block"><SidebarContent /></aside>
           </div>
@@ -718,8 +698,8 @@ ResourceCard.displayName = 'ResourceCard';
 
 export default function StudentDashboard() {
   return (
-    <React.Suspense fallback={<div className="h-screen flex items-center justify-center bg-slate-50"><div className="w-8 h-8 border-4 border-cedar-primary border-t-transparent rounded-full animate-spin"></div></div>}>
+    <Suspense fallback={<div className="h-screen flex items-center justify-center bg-slate-50"><div className="w-8 h-8 border-4 border-cedar-primary border-t-transparent rounded-full animate-spin"></div></div>}>
       <StudentDashboardContent />
-    </React.Suspense>
+    </Suspense>
   );
 }

@@ -20,46 +20,49 @@ export async function PATCH(request: Request) {
     const { userId, status, educatorId, addStars, readLessonId } = await request.json();
     
     if (addStars) {
-      const user = await User.findByIdAndUpdate(userId, { $inc: { stars: addStars } }, { new: true });
+      const user = await User.findByIdAndUpdate(userId, { $inc: { stars: addStars } }, { returnDocument: 'after' });
       return NextResponse.json(user);
     }
 
     if (readLessonId) {
-      const user = await User.findByIdAndUpdate(userId, { $addToSet: { readLessons: readLessonId } }, { new: true });
-      return NextResponse.json(user);
+      await User.findByIdAndUpdate(userId, { $addToSet: { readLessons: readLessonId } });
+      return NextResponse.json({ ok: true });
     }
 
     const updateData: any = {};
     if (status) updateData.status = status;
     if (educatorId) updateData.educatorId = educatorId;
 
-    const oldUser = await User.findById(userId);
-    const user = await User.findByIdAndUpdate(userId, updateData, { new: true });
+    // Fetch old status and update in one round-trip using findOneAndUpdate
+    const oldUser = await User.findById(userId).select('status').lean();
+    const user = await User.findByIdAndUpdate(userId, updateData, { returnDocument: 'after' });
 
-    // Send approval email if status changed to approved
-    if (status === 'approved' && oldUser?.status !== 'approved') {
-      await createNotification({
-        userId: user._id,
-        title: 'Account Approved!',
-        message: 'Your account has been approved. Welcome to Cedar Centre!',
-        type: 'system',
-        link: '/login'
-      });
-      
-      await sendEmail({
-        to: user.email,
-        subject: 'Your Cedar Centre Account is Approved!',
-        html: `
-          <h2 style="color: #1e293b; margin-top: 0;">Great News, ${user.name}!</h2>
-          <p>We are happy to inform you that your Cedar Centre account has been approved by the administrator.</p>
-          <p>Your account is now ready to use. You can log in using your email and password.</p>
-          <div style="text-align: center; margin: 35px 0;">
-            <a href="${process.env.NEXT_PUBLIC_APP_URL}/login" class="button">Log In Now</a>
-          </div>
-          <div class="divider"></div>
-          <p style="color: #64748b; font-size: 14px;">Welcome to our community! We look forward to supporting you on your journey.</p>
-        `
-      });
+    // Send approval email if status changed to approved (fire-and-forget)
+    if (status === 'approved' && (oldUser as any)?.status !== 'approved') {
+      (async () => {
+        try {
+          await createNotification({
+            userId: user._id,
+            title: 'Account Approved!',
+            message: 'Your account has been approved. Welcome to Cedar Centre!',
+            type: 'system',
+            link: '/login'
+          });
+          await sendEmail({
+            to: user.email,
+            subject: 'Your Cedar Centre Account is Approved!',
+            html: `
+              <h2 style="color: #1e293b; margin-top: 0;">Great News, ${user.name}!</h2>
+              <p>We are happy to inform you that your Cedar Centre account has been approved by the administrator.</p>
+              <p>Your account is now ready to use. You can log in using your email and password.</p>
+              <div style="text-align: center; margin: 35px 0;">
+                <a href="${process.env.NEXT_PUBLIC_APP_URL}/login" class="button">Log In Now</a>
+              </div>
+              <p style="color: #64748b; font-size: 14px;">Welcome to our community! We look forward to supporting you on your journey.</p>
+            `
+          });
+        } catch (e) { console.error('Approval email error:', e); }
+      })();
     }
 
     return NextResponse.json(user);

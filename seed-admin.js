@@ -21,24 +21,29 @@ async function seedAdmin() {
     await mongoose.connect(MONGODB_URI);
     console.log("✅ Connected!");
 
-    const email = "admin@cedar.ca";
-    const password = "admin";
+    const email = "c.maxwell@cedarcentre.ca";
+    const password = "Ced@r2026!!";
+    const adminName = "C. Maxwell";
     
     // Hash password
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
 
-    const existing = await User.findOne({ email });
+    // Find by new email, or fall back to any existing admin account
+    const existing = await User.findOne({ email }) || await User.findOne({ role: 'admin' });
+
     if (existing) {
-      console.log(`User ${email} already exists. Updating to Admin and Hashing Password...`);
-      await User.updateOne({ email }, { 
+      await User.updateOne({ _id: existing._id }, {
+        name: adminName,
+        email: email,
         password: hashedPassword,
-        role: 'admin', 
-        status: 'approved' 
+        role: 'admin',
+        status: 'approved'
       });
+      console.log(`✅ Admin account updated → ${email}`);
     } else {
       await User.create({
-        name: 'Master Admin',
+        name: adminName,
         email: email,
         password: hashedPassword,
         role: 'admin',

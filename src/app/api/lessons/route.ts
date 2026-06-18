@@ -34,65 +34,70 @@ export async function POST(request: Request) {
       lessonData.educatorId = session.user.id;
     }
     
-    console.log("Creating lesson with data:", lessonData);
     const newLesson = await Lesson.create(lessonData);
 
-    // Notify students about new content
-    try {
-      const educator = await User.findById(lessonData.educatorId);
-      let studentQuery: any = { role: 'student' };
-      
-      // If selective, use IDs, otherwise notify all students assigned to this educator
-      if (lessonData.assignedStudents && !lessonData.assignedStudents.includes('all')) {
-        studentQuery._id = { $in: lessonData.assignedStudents };
-      } else {
-        studentQuery.educatorId = lessonData.educatorId;
-      }
+    // ── Fire-and-forget: notifications + emails send in background ──────────
+    // We do NOT await this block — the response is returned immediately after
+    // saving the lesson so the coach UI is never blocked waiting for emails.
+    (async () => {
+      try {
+        const educator = await User.findById(lessonData.educatorId);
+        let studentQuery: any = { role: 'student' };
 
-      const students = await User.find(studentQuery);
-      const weekLabel = newLesson.weekNumber ? `Week ${newLesson.weekNumber}` : '';
-      const releaseDate = newLesson.releaseDate ? new Date(newLesson.releaseDate) : new Date(Date.now() - 1000); 
-      const isFutureRelease = newLesson.releaseDate && new Date(newLesson.releaseDate) > new Date();
+        if (lessonData.assignedStudents && !lessonData.assignedStudents.includes('all')) {
+          studentQuery._id = { $in: lessonData.assignedStudents };
+        } else {
+          studentQuery.educatorId = lessonData.educatorId;
+        }
 
-      for (const student of students) {
-        await createNotification({
-          userId: student._id.toString(),
-          title: 'New Content Posted',
-          message: `Your educator has posted: ${newLesson.title}${weekLabel ? ` under ${weekLabel}` : ''}`,
-          type: 'lesson',
-          link: `/student`, // Link to dashboard for general notification
-          scheduledAt: releaseDate
-        });
-
-        // Always send notification email, adjust wording if future release
+        const students = await User.find(studentQuery);
+        const weekLabel = newLesson.weekNumber ? `Week ${newLesson.weekNumber}` : '';
+        const releaseDate = newLesson.releaseDate ? new Date(newLesson.releaseDate) : new Date(Date.now() - 1000);
+        const isFutureRelease = newLesson.releaseDate && new Date(newLesson.releaseDate) > new Date();
         const statusText = isFutureRelease ? "Upcoming Content Assigned!" : "New Content Posted!";
-        const actionText = isFutureRelease ? "Log in to view your upcoming Journey Path schedule." : "Log in to your dashboard to view the new material and start your journey.";
-        
-        await sendEmail({
-          to: student.email,
-          subject: `${isFutureRelease ? 'Upcoming' : 'New'} Content: ${newLesson.title} ${weekLabel ? `(${weekLabel})` : ''}`,
-          html: `
-            <h2 style="color: #1e293b; margin-top: 0;">${statusText}</h2>
-            <p>Hi ${student.name},</p>
-            <p>Your Coach, <strong>${educator?.name || 'a Coach'}</strong>, has assigned content to your path.</p>
-            <div style="background-color: #f1f5f9; padding: 20px; border-radius: 12px; margin: 25px 0;">
-              <h3 style="margin-top: 0; color: #0d9488;">${newLesson.title}</h3>
-              ${newLesson.weekNumber ? `<p style="margin-bottom: 0;"><strong>${newLesson.weekTitle || `Week ${newLesson.weekNumber}`}</strong></p>` : ''}
-              ${isFutureRelease ? `<p style="margin-top: 10px; color: #64748b; font-size: 14px;"><em>Unlocks on ${releaseDate.toLocaleDateString()}</em></p>` : ''}
-            </div>
-            <p>${actionText}</p>
-            <div style="text-align: center; margin: 35px 0;">
-              <a href="${process.env.NEXT_PUBLIC_APP_URL}/student" class="button">View Dashboard</a>
-            </div>
-            <div class="divider"></div>
-            <p style="color: #64748b; font-size: 14px;">Happy learning!</p>
-          `
-        });
+        const actionText = isFutureRelease
+          ? "Log in to view your upcoming Journey Path schedule."
+          : "Log in to your dashboard to view the new material and start your journey.";
+
+        // Create all notifications in parallel
+        await Promise.all(students.map(student =>
+          createNotification({
+            userId: student._id.toString(),
+            title: 'New Content Posted',
+            message: `Your educator has posted: ${newLesson.title}${weekLabel ? ` under ${weekLabel}` : ''}`,
+            type: 'lesson',
+            link: '/student',
+            scheduledAt: releaseDate
+          })
+        ));
+
+        // Send all emails in parallel
+        await Promise.all(students.map(student =>
+          sendEmail({
+            to: student.email,
+            subject: `${isFutureRelease ? 'Upcoming' : 'New'} Content: ${newLesson.title}${weekLabel ? ` (${weekLabel})` : ''}`,
+            html: `
+              <h2 style="color: #1e293b; margin-top: 0;">${statusText}</h2>
+              <p>Hi ${student.name},</p>
+              <p>Your Coach, <strong>${educator?.name || 'a Coach'}</strong>, has assigned content to your path.</p>
+              <div style="background-color: #f1f5f9; padding: 20px; border-radius: 12px; margin: 25px 0;">
+                <h3 style="margin-top: 0; color: #0d9488;">${newLesson.title}</h3>
+                ${newLesson.weekNumber ? `<p style="margin-bottom: 0;"><strong>${newLesson.weekTitle || `Week ${newLesson.weekNumber}`}</strong></p>` : ''}
+                ${isFutureRelease ? `<p style="margin-top: 10px; color: #64748b; font-size: 14px;"><em>Unlocks on ${releaseDate.toLocaleDateString()}</em></p>` : ''}
+              </div>
+              <p>${actionText}</p>
+              <div style="text-align: center; margin: 35px 0;">
+                <a href="${process.env.NEXT_PUBLIC_APP_URL}/student" class="button">View Dashboard</a>
+              </div>
+              <p style="color: #64748b; font-size: 14px;">Happy learning!</p>
+            `
+          })
+        ));
+      } catch (bgError) {
+        console.error("Background notification error:", bgError);
       }
-    } catch (emailError) {
-      console.error("Error sending content notification emails:", emailError);
-      // Don't fail the whole request if emails fail
-    }
+    })();
+    // ────────────────────────────────────────────────────────────────────────
 
     return NextResponse.json(newLesson);
   } catch (error: any) {

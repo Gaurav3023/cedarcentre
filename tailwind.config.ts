@@ -34,8 +34,8 @@ const config: Config = {
         },
       },
       fontFamily: {
-        serif: ["freight-text-pro", "Playfair Display", "serif"],
-        sans: ["interstate", "Inter", "sans-serif"],
+        serif: ["'Nunito Sans'", "sans-serif"],
+        sans: ["'Nunito Sans'", "sans-serif"],
       },
       backgroundImage: {
         "gradient-radial": "radial-gradient(var(--tw-gradient-stops))",

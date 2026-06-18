@@ -3,10 +3,11 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth, User, Lesson, Submission, SupportRequest } from "@/context/AuthContext";
 import { Users, FileText, Plus, LogOut, ArrowRight, ArrowLeft, X, PlayCircle, Book, CheckCircle2, MessageCircle, Star, Calendar, Clock, ChevronDown, Menu, Search, Filter, Briefcase, GraduationCap, Send, Trash2, Edit2, ExternalLink, Activity, Save, FileUp, BookOpen, ChevronUp, Zap, Link as LinkIcon, Paperclip, Type, ClipboardList, ShieldCheck, UserPlus, LayoutGrid, List } from "lucide-react";
-import { useState, useMemo, useCallback, useEffect } from "react";
+import { useState, useMemo, useCallback, useEffect, Suspense } from "react";
 import Link from "next/link";
 import RoleGuard from "@/components/RoleGuard";
 import NotificationsDropdown from "@/components/NotificationsDropdown";
+import DateTimePicker from "@/components/DateTimePicker";
 import { useSearchParams } from "next/navigation";
 
 // Sub-components moved outside to prevent unmounting bugs
@@ -65,6 +66,7 @@ function EducatorDashboardContent() {
   const [lessonModal, setLessonModal] = useState<{ mode: 'create' | 'edit', lesson?: Lesson } | null>(null);
   const [submissionModal, setSubmissionModal] = useState<Submission | null>(null);
   const [rewardModal, setRewardModal] = useState<{ submissionId: string } | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
 
   const [lessonForm, setLessonForm] = useState<{
     title: string;
@@ -119,28 +121,39 @@ function EducatorDashboardContent() {
 
   const handleCreateLessson = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!lessonForm.title || !lessonForm.content || !user) return;
-    await createLesson({ 
-      ...lessonForm, 
-      educatorId: user.id,
-      resourceLinks: lessonForm.mediaUrls.filter(u => u.trim() !== "") 
-    });
-    setLessonModal(null);
-    resetLessonForm();
+    if (!lessonForm.title || !lessonForm.content || !user || isSaving) return;
+    setIsSaving(true);
+    try {
+      await createLesson({ 
+        ...lessonForm, 
+        educatorId: user.id,
+        resourceLinks: lessonForm.mediaUrls.filter(u => u.trim() !== "") 
+      });
+      setLessonModal(null);
+      resetLessonForm();
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const handleUpdateLesson = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!lessonModal?.lesson?.id) return;
-    await updateLesson(lessonModal.lesson.id, { 
-      ...lessonForm,
-      resourceLinks: lessonForm.mediaUrls.filter(u => u.trim() !== "")
-    });
-    setLessonModal(null);
-    resetLessonForm();
+    if (!lessonModal?.lesson?.id || isSaving) return;
+    setIsSaving(true);
+    try {
+      await updateLesson(lessonModal.lesson.id, { 
+        ...lessonForm,
+        resourceLinks: lessonForm.mediaUrls.filter(u => u.trim() !== "")
+      });
+      setLessonModal(null);
+      resetLessonForm();
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const handleReward = (submissionId: string, stars: number, feedback: string) => {
+    // Instant: optimistic update in context, close modals immediately
     rewardSubmission(submissionId, stars, feedback);
     setRewardModal(null);
     setSubmissionModal(null);
@@ -634,53 +647,56 @@ function EducatorDashboardContent() {
                            <button type="button" onClick={() => setLessonForm({...lessonForm, type: 'text'})} className={`py-4 rounded-2xl flex flex-col items-center gap-2 border transition-all ${lessonForm.type === 'text' ? 'bg-cedar-primary text-white border-cedar-primary shadow-lg' : 'bg-slate-50 text-slate-400 border-slate-100 hover:bg-slate-100'}`}><Type className="w-5 h-5" /><span className="text-[10px] font-black uppercase tracking-widest">Task</span></button>
                         </div>
 
-                        {lessonForm.type === 'video' && (
-                           <div className="mt-8 space-y-4 animate-in fade-in slide-in-from-top-4 duration-300">
-                              {!lessonForm.videoUrl ? (
-                                 <button 
-                                   type="button" 
-                                   onClick={() => setLessonForm({...lessonForm, videoUrl: " "})}
-                                   className="w-full py-10 border-2 border-dashed border-slate-200 rounded-[2rem] flex flex-col items-center justify-center hover:border-cedar-primary hover:bg-cedar-primary/5 transition-all text-slate-400 hover:text-cedar-primary group"
-                                 >
-                                    <div className="w-10 h-10 bg-slate-50 rounded-xl flex items-center justify-center mb-2 group-hover:scale-110 transition-all"><Plus className="w-5 h-5" /></div>
-                                    <span className="text-[10px] font-black uppercase tracking-widest">Attach Video URL</span>
-                                 </button>
-                              ) : (
-                                 <div className="space-y-4 bg-slate-50/50 p-6 rounded-[2.5rem] border border-slate-100">
-                                    <div className="flex items-center justify-between px-1">
-                                       <h4 className="text-[9px] font-black uppercase text-slate-400 tracking-widest flex items-center gap-2"><PlayCircle className="w-3.5 h-3.5" /> Primary Video</h4>
-                                       <button type="button" onClick={() => setLessonForm({...lessonForm, videoUrl: ""})} className="text-[9px] font-black uppercase text-red-400 hover:underline">Remove</button>
-                                    </div>
-                                    <div className="relative group">
-                                       <LinkIcon className={`absolute left-5 top-1/2 -translate-y-1/2 w-4 h-4 ${lessonForm.videoUrl.trim() ? 'text-cedar-primary' : 'text-slate-300'}`} />
-                                       <input 
-                                         placeholder="Paste YouTube or Vimeo URL here..." 
-                                         value={lessonForm.videoUrl.trim()} 
-                                         onChange={e => setLessonForm({...lessonForm, videoUrl: e.target.value})} 
-                                         className="w-full pl-12 pr-4 py-3.5 bg-white border border-slate-200 rounded-2xl text-xs font-bold outline-none focus:border-cedar-primary transition-all shadow-sm" 
-                                       />
-                                    </div>
-                                    
-                                    {lessonForm.videoUrl.trim() && (
-                                       <div className="aspect-video bg-slate-900 rounded-2xl overflow-hidden shadow-xl border-4 border-white relative">
-                                          {(() => {
-                                             const url = lessonForm.videoUrl.trim();
-                                             let embedUrl = url;
-                                             if (url.includes('youtube.com') || url.includes('youtu.be')) {
-                                               const videoId = url.includes('v=') ? url.split('v=')[1]?.split('&')[0] : url.split('youtu.be/')[1]?.split('?')[0];
-                                               embedUrl = videoId ? `https://www.youtube.com/embed/${videoId}` : url;
-                                             } else if (url.includes('vimeo.com')) {
-                                               const vimeoId = url.split('/').pop()?.split('?')[0];
-                                               embedUrl = vimeoId ? `https://player.vimeo.com/video/${vimeoId}` : url;
-                                             }
-                                             return <iframe className="w-full h-full" src={embedUrl} allowFullScreen />;
-                                          })()}
-                                       </div>
-                                    )}
-                                 </div>
-                              )}
-                           </div>
-                        )}
+                        {lessonForm.type === 'video' && (() => {
+                            const currentVideos = lessonForm.videoUrl ? lessonForm.videoUrl.split(',') : [];
+                            
+                            return (
+                               <div className="mt-8 space-y-4 animate-in fade-in slide-in-from-top-4 duration-300">
+                                  {currentVideos.length === 0 ? (
+                                     <button 
+                                       type="button" 
+                                       onClick={() => setLessonForm({...lessonForm, videoUrl: " "})}
+                                       className="w-full py-10 border-2 border-dashed border-slate-200 rounded-[2rem] flex flex-col items-center justify-center hover:border-cedar-primary hover:bg-cedar-primary/5 transition-all text-slate-400 hover:text-cedar-primary group"
+                                     >
+                                        <div className="w-10 h-10 bg-slate-50 rounded-xl flex items-center justify-center mb-2 group-hover:scale-110 transition-all"><Plus className="w-5 h-5" /></div>
+                                        <span className="text-[10px] font-black uppercase tracking-widest">Attach Video URL</span>
+                                     </button>
+                                  ) : (
+                                     <div className="space-y-4 bg-slate-50/50 p-6 rounded-[2.5rem] border border-slate-100">
+                                        <div className="flex items-center justify-between px-1">
+                                           <h4 className="text-[9px] font-black uppercase text-slate-400 tracking-widest flex items-center gap-2"><PlayCircle className="w-3.5 h-3.5" /> Primary Videos</h4>
+                                           {currentVideos.length < 5 && (
+                                              <button type="button" onClick={() => setLessonForm({...lessonForm, videoUrl: lessonForm.videoUrl + (lessonForm.videoUrl.trim() ? ", " : " ")})} className="text-[9px] font-black uppercase text-cedar-primary hover:underline">Add Another Video</button>
+                                           )}
+                                        </div>
+                                        {currentVideos.map((url, i) => (
+                                           <div key={i} className="space-y-2">
+                                             <div className="flex items-center gap-2">
+                                               <div className="relative group flex-1">
+                                                  <LinkIcon className={`absolute left-5 top-1/2 -translate-y-1/2 w-4 h-4 ${url.trim() ? 'text-cedar-primary' : 'text-slate-300'}`} />
+                                                  <input 
+                                                    placeholder="Paste YouTube or Vimeo URL here..." 
+                                                    value={url.trim()} 
+                                                    onChange={e => {
+                                                        const nextUrls = [...currentVideos];
+                                                        nextUrls[i] = e.target.value;
+                                                        setLessonForm({...lessonForm, videoUrl: nextUrls.join(',')});
+                                                    }} 
+                                                    className="w-full pl-12 pr-4 py-3.5 bg-white border border-slate-200 rounded-2xl text-xs font-bold outline-none focus:border-cedar-primary transition-all shadow-sm" 
+                                                  />
+                                               </div>
+                                               <button type="button" onClick={() => {
+                                                   const nextUrls = currentVideos.filter((_, idx) => idx !== i);
+                                                   setLessonForm({...lessonForm, videoUrl: nextUrls.join(',')});
+                                               }} className="text-[9px] font-black uppercase text-red-400 hover:underline p-2">Remove</button>
+                                             </div>
+                                           </div>
+                                        ))}
+                                     </div>
+                                  )}
+                               </div>
+                            );
+                        })()}
                       </div>
                    </div>
 
@@ -742,15 +758,18 @@ function EducatorDashboardContent() {
                         <div className="space-y-6">
                           {lessonForm.fileUrls.length > 0 && (
                             <div className="flex flex-wrap gap-3 mb-6">
-                              {lessonForm.fileUrls.map((url, i) => (
+                              {lessonForm.fileUrls.map((url, i) => {
+                                const fileName = url.includes('---') ? url.split('---')[1] : url.split('/').pop() || `File ${i+1}`;
+                                return (
                                 <div key={i} className="flex items-center gap-3 bg-white border border-slate-100 pl-4 pr-2 py-2 rounded-xl text-[10px] font-bold text-slate-600 shadow-sm group/item">
                                    <FileText className="w-4 h-4 text-cedar-primary" />
-                                   <span className="truncate max-w-[150px]">Artifact {i+1}</span>
+                                   <span className="truncate max-w-[150px]" title={fileName}>{fileName}</span>
                                    <button type="button" onClick={() => setLessonForm({...lessonForm, fileUrls: lessonForm.fileUrls.filter((_, idx) => idx !== i)})} className="p-1.5 hover:bg-red-50 hover:text-red-500 rounded-lg transition-all">
                                      <X className="w-4 h-4" />
                                    </button>
                                 </div>
-                              ))}
+                                );
+                              })}
                             </div>
                           )}
                           
@@ -790,12 +809,27 @@ function EducatorDashboardContent() {
                       </div>
                    </div>
 
-                   <div className="grid grid-cols-1 md:grid-cols-2 gap-8 pt-4">
-                      <div className="space-y-4"><label className="text-xs font-black uppercase text-slate-400 tracking-widest ml-1">Release Date</label><input type="datetime-local" onClick={(e) => (e.target as any).showPicker?.()} value={lessonForm.releaseDate} onChange={e => setLessonForm({...lessonForm, releaseDate: e.target.value})} className="w-full bg-slate-50 border border-slate-100 rounded-3xl px-8 py-5 text-sm outline-none cursor-pointer" /></div>
-                      <div className="space-y-4"><label className="text-xs font-black uppercase text-slate-400 tracking-widest ml-1">Deadline</label><input type="datetime-local" onClick={(e) => (e.target as any).showPicker?.()} value={lessonForm.deadline} onChange={e => setLessonForm({...lessonForm, deadline: e.target.value})} className="w-full bg-slate-50 border border-slate-100 rounded-3xl px-8 py-5 text-sm outline-none cursor-pointer" /></div>
-                   </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8 pt-4">
+                       <DateTimePicker
+                          label="Release Date"
+                          value={lessonForm.releaseDate}
+                          onChange={(val) => setLessonForm({ ...lessonForm, releaseDate: val })}
+                       />
+                       <DateTimePicker
+                          label="Deadline"
+                          value={lessonForm.deadline}
+                          onChange={(val) => setLessonForm({ ...lessonForm, deadline: val })}
+                       />
+                    </div>
 
-                   <button type="submit" className="w-full bg-cedar-primary text-white py-8 rounded-[3rem] text-xl font-bold shadow-2xl hover:scale-[1.01] transition-all">Launch Journey Step</button>
+                   <button type="submit" disabled={isSaving} className={`w-full bg-cedar-primary text-white py-8 rounded-[3rem] text-xl font-bold shadow-2xl transition-all ${isSaving ? 'opacity-60 cursor-not-allowed' : 'hover:scale-[1.01]'}`}>
+                     {isSaving ? (
+                       <span className="flex items-center justify-center gap-3">
+                         <svg className="animate-spin w-5 h-5" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
+                         Saving...
+                       </span>
+                     ) : lessonModal?.mode === 'edit' ? 'Update Journey Step' : 'Launch Journey Step'}
+                   </button>
                 </form>
              </motion.div>
           </div>
@@ -822,12 +856,15 @@ function EducatorDashboardContent() {
                                 <ExternalLink className="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity" />
                              </a>
                            ))}
-                           {submissionModal.fileUrls?.filter(url => url.trim()).map((url, i) => (
+                           {submissionModal.fileUrls?.filter(url => url.trim()).map((url, i) => {
+                             const fileName = url.includes('---') ? decodeURIComponent(url.split('---')[1]) : url.split('/').pop() || `File ${i+1}`;
+                             return (
                              <a key={i} href={url} target="_blank" className="flex items-center justify-between px-6 py-4 bg-cedar-primary text-white rounded-2xl text-[10px] font-black uppercase tracking-widest border border-transparent shadow-lg shadow-cedar-primary/10 hover:translate-y-[-2px] transition-all group">
-                                <span className="flex items-center gap-3"><Paperclip className="w-4 h-4" /> File Artifact #{i+1}</span>
-                                <ExternalLink className="w-4 h-4" />
+                                <span className="flex items-center gap-3 truncate max-w-[200px]" title={fileName}><Paperclip className="w-4 h-4 shrink-0" /> <span className="truncate">{fileName}</span></span>
+                                <ExternalLink className="w-4 h-4 shrink-0" />
                              </a>
-                           ))}
+                             );
+                           })}
                         </div>
                      </div>
                    )}
@@ -854,8 +891,8 @@ function EducatorDashboardContent() {
 
 export default function EducatorDashboard() {
   return (
-    <React.Suspense fallback={<div className="h-screen flex items-center justify-center bg-slate-50"><div className="w-8 h-8 border-4 border-cedar-primary border-t-transparent rounded-full animate-spin"></div></div>}>
+    <Suspense fallback={<div className="h-screen flex items-center justify-center bg-slate-50"><div className="w-8 h-8 border-4 border-cedar-primary border-t-transparent rounded-full animate-spin"></div></div>}>
       <EducatorDashboardContent />
-    </React.Suspense>
+    </Suspense>
   );
 }

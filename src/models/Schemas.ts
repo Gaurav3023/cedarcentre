@@ -15,7 +15,7 @@ const UserSchema = new Schema({
   role: { type: String, enum: ['student', 'educator', 'admin'], default: 'student' },
   status: { type: String, enum: ['pending', 'approved'], default: 'pending' },
   stars: { type: Number, default: 0 },
-  educatorId: { type: String, default: null },
+  educatorId: { type: String, default: null, index: true },
   readLessons: { type: [String], default: [] },
   resetPasswordToken: { type: String, default: null },
   resetPasswordExpires: { type: Date, default: null },
@@ -25,35 +25,38 @@ const LessonSchema = new Schema({
   title: { type: String, required: true },
   content: { type: String, required: true },
   type: { type: String, default: 'text' }, 
-  educatorId: { type: String, required: true },
-  assignedStudents: { type: [String], default: ['all'] }, 
+  educatorId: { type: String, required: true, index: true },
+  assignedStudents: { type: [String], default: ['all'], index: true }, 
   releaseDate: { type: String, default: null }, 
   deadline: { type: String, default: null },
   fileUrl: { type: String, default: null },
-  fileUrls: { type: [String], default: [] }, // Added for multiple files
+  fileUrls: { type: [String], default: [] },
   videoUrl: { type: String, default: null },
   resourceLinks: [String],
-  weekNumber: { type: Number, default: 0 }, // Added for weekly grouping
-  weekTitle: { type: String, default: "" }, // Added for week naming
+  weekNumber: { type: Number, default: 0 },
+  weekTitle: { type: String, default: "" },
 }, { timestamps: true });
 
 const SubmissionSchema = new Schema({
-  lessonId: { type: String, required: true },
-  studentId: { type: String, required: true },
+  lessonId: { type: String, required: true, index: true },
+  studentId: { type: String, required: true, index: true },
   content: { type: String, required: true },
   links: [String],
   fileUrl: { type: String, default: null },
-  fileUrls: { type: [String], default: [] }, // Added for multiple files
-  status: { type: String, enum: ['pending', 'reviewed'], default: 'pending' },
+  fileUrls: { type: [String], default: [] },
+  status: { type: String, enum: ['pending', 'reviewed'], default: 'pending', index: true },
   rewardStars: { type: Number, default: 0 },
   feedback: { type: String, default: '' },
 }, { timestamps: true });
 
+// Compound index for the most common query: "all submissions for a student"
+SubmissionSchema.index({ studentId: 1, lessonId: 1 });
+
 const SupportRequestSchema = new Schema({
-  studentId: { type: String, required: true },
-  educatorId: { type: String, required: true },
+  studentId: { type: String, required: true, index: true },
+  educatorId: { type: String, required: true, index: true },
   message: { type: String, required: true }, 
-  status: { type: String, enum: ['open', 'resolved'], default: 'open' },
+  status: { type: String, enum: ['open', 'resolved'], default: 'open', index: true },
   studentHasUnread: { type: Boolean, default: false },
   educatorHasUnread: { type: Boolean, default: false },
   chat: [{
@@ -65,11 +68,10 @@ const SupportRequestSchema = new Schema({
 }, { timestamps: true });
 
 // Support Request Management with Auto-Cleanup (TTL)
-// Documents will automatically be removed 5 days after their last update
 SupportRequestSchema.index({ updatedAt: 1 }, { expireAfterSeconds: 432000 });
 
 const NotificationSchema = new Schema({
-  userId: { type: String, required: true },
+  userId: { type: String, required: true, index: true },
   title: { type: String, required: true },
   message: { type: String, required: true },
   type: { type: String, enum: ['system', 'lesson', 'submission', 'chat', 'grade'], default: 'system' },
@@ -77,6 +79,10 @@ const NotificationSchema = new Schema({
   read: { type: Boolean, default: false },
   scheduledAt: { type: Date, default: Date.now },
 }, { timestamps: true });
+
+// Compound index for the most common notification query
+NotificationSchema.index({ userId: 1, scheduledAt: 1 });
+NotificationSchema.index({ userId: 1, read: 1 });
 
 export const User = models.User || model('User', UserSchema);
 export const Lesson = models.Lesson || model('Lesson', LessonSchema);

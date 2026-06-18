@@ -1,9 +1,16 @@
-@import url("https://use.typekit.net/skr3syb.css");
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Nunito+Sans:ital,opsz,wght@0,6..12,300;0,6..12,400;0,6..12,500;0,6..12,600;0,6..12,700;0,6..12,800;1,6..12,300;1,6..12,400;1,6..12,500;1,6..12,600;1,6..12,700&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* ── Universal font override ────────────────────────────────────────────────
+   Ensures every element — including inputs, buttons, selects, and any
+   third-party components — uses Nunito Sans, with no exceptions.
+─────────────────────────────────────────────────────────────────────────── */
+*, *::before, *::after {
+  font-family: 'Nunito Sans', sans-serif !important;
+}
 
 :root {
   --foreground-rgb: 1, 113, 150;
@@ -12,10 +19,12 @@
 }
 
 body {
+  font-family: 'Nunito Sans', sans-serif;
   color: #1e293b;
   background: #fff5f5; /* Premium Light Pink soft background */
   min-height: 100vh;
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 @layer components {
@@ -67,6 +76,6 @@ body {
 
 /* Typography map to Cedar Centre branding */
 .font-serif {
-  font-family: 'freight-text-pro', Georgia, serif;
+  font-family: 'Nunito Sans', sans-serif;
 }
 

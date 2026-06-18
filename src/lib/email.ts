@@ -23,8 +23,9 @@ export const sendEmail = async ({ to, subject, html }: { to: string; subject: st
       <html>
         <head>
           <meta charset="utf-8">
+          <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@300;400;600;700;800&display=swap" rel="stylesheet">
         </head>
-        <body style="background-color: #f8fafc; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">
+        <body style="background-color: #f8fafc; margin: 0; padding: 0; font-family: 'Nunito Sans', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">
           <div style="max-width: 600px; margin: 0 auto; padding: 40px 20px; color: #334155; line-height: 1.6;">
             <div style="text-align: center; margin-bottom: 40px;">
               <img src="${LOGO_URL}" alt="Cedar Centre Logo" style="height: 60px; margin-bottom: 20px;">

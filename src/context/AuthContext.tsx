@@ -18,7 +18,7 @@ export interface Lesson {
   releaseDate?: string; 
   deadline?: string;    
   weekNumber?: number; 
-  weekTitle?: string; // Formal week title (e.g. "Finding Safety")
+  weekTitle?: string;
   resourceLinks?: string[];
   createdAt: string;
 }
@@ -119,6 +119,29 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const router = useRouter();
 
+  // Map raw API data to typed objects
+  const mapUser = (u: any): User => ({
+    ...u,
+    id: u.id || u._id,
+    assignedEducatorId: u.educatorId || u.assignedEducatorId
+  });
+
+  const mapLesson = (l: any): Lesson => ({
+    ...l,
+    id: l._id || l.id,
+    assignedStudents: l.assignedStudents || [],
+    fileUrls: l.fileUrls || (l.fileUrl ? [l.fileUrl] : []),
+    weekNumber: l.weekNumber || 0,
+    weekTitle: l.weekTitle || ''
+  });
+
+  const mapSubmission = (s: any): Submission => ({
+    ...s,
+    id: s._id || s.id,
+    submittedAt: s.createdAt,
+    fileUrls: s.fileUrls || (s.fileUrl ? [s.fileUrl] : [])
+  });
+
   const fetchAll = useCallback(async () => {
     try {
       const res = await fetch('/api/sync', { cache: 'no-store' });
@@ -127,11 +150,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const data = await res.json();
       const { users: uData, lessons: lData, submissions: sData, supportRequests: supData, notifications: nData } = data;
 
-      const mappedUsers = uData.map((u: any) => ({ 
-        ...u, 
-        id: u.id || u._id, 
-        assignedEducatorId: u.educatorId || u.assignedEducatorId 
-      })); 
+      const mappedUsers = uData.map(mapUser);
       setUsers(mappedUsers); 
       
       // Update local user state if it changed in DB
@@ -144,20 +163,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         }
       }
       
-      setLessons(lData.map((l: any) => ({ 
-        ...l, 
-        id: l._id, 
-        assignedStudents: l.assignedStudents || [],
-        fileUrls: l.fileUrls || (l.fileUrl ? [l.fileUrl] : []),
-        weekNumber: l.weekNumber || 0,
-        weekTitle: l.weekTitle || ""
-      })));
-      setSubmissions(sData.map((s: any) => ({ 
-        ...s, 
-        id: s._id, 
-        submittedAt: s.createdAt,
-        fileUrls: s.fileUrls || (s.fileUrl ? [s.fileUrl] : [])
-      })));
+      setLessons(lData.map(mapLesson));
+      setSubmissions(sData.map(mapSubmission));
       setSupportRequests(supData.map((su: any) => ({ ...su, id: su._id })));
       setNotifications(nData.map((n: any) => ({ ...n, id: n._id })));
     } catch (e) {
@@ -179,7 +186,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     const resetTimer = () => {
       if (timeout) clearTimeout(timeout);
-      // Auto logout after 30 minutes of inactivity
       timeout = setTimeout(() => {
         logout();
         alert("Your session has expired due to inactivity. Please log in again.");
@@ -201,7 +207,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const session = localStorage.getItem('cedar_session_v5');
     if (session) {
       const parsed = JSON.parse(session);
-      // Session expires after 4 hours of total duration for security
       if (parsed.expiresAt && Date.now() > parsed.expiresAt) {
         logout();
       } else {
@@ -211,8 +216,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setLoading(false);
     fetchAll();
 
-    // Auto-sync every 45 seconds to keep dashboard fresh
-    const interval = setInterval(fetchAll, 45000);
+    // Auto-sync every 60 seconds
+    const interval = setInterval(fetchAll, 60000);
     return () => clearInterval(interval);
   }, [fetchAll, user?.id]);
 
@@ -229,7 +234,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       ...found, 
       id: found.id || found._id, 
       assignedEducatorId: found.educatorId,
-      expiresAt: Date.now() + (4 * 60 * 60 * 1000) // 4 hour session limit
+      expiresAt: Date.now() + (4 * 60 * 60 * 1000)
     };
 
     if (isAdmin && mappedUser.role !== 'admin') return false;
@@ -237,7 +242,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     
     setUser(mappedUser);
     localStorage.setItem('cedar_session_v5', JSON.stringify(mappedUser));
-    await fetchAll(); // Sync immediately so dashboard is ready
+    await fetchAll();
     router.push(mappedUser.role === 'admin' ? '/admin' : mappedUser.role === 'educator' ? '/educator' : '/student');
     return true;
   };
@@ -255,155 +260,281 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return true;
   };
 
+  // ─── OPTIMISTIC UPDATE HELPERS ────────────────────────────────────────────
+  // All mutation functions below:
+  //   1. Update local state IMMEDIATELY (optimistic) so UI is instant
+  //   2. Fire the network request in the background
+  //   3. Only call fetchAll on error, or schedule a quiet background reconcile
+
   const updateUserStatus = async (userId: string, status: UserStatus) => {
-    await fetch('/api/users', {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ userId, status })
-    });
-    fetchAll();
+    // Optimistic: flip status in local state right away
+    setUsers(prev => prev.map(u => u.id === userId ? { ...u, status } : u));
+    try {
+      await fetch('/api/users', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId, status })
+      });
+    } catch {
+      // Rollback on failure
+      fetchAll();
+    }
   };
 
   const assignStudent = async (studentId: string, educatorId: string) => {
-    await fetch('/api/users', {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ userId: studentId, educatorId })
-    });
-    fetchAll();
+    // Optimistic: assign locally
+    setUsers(prev => prev.map(u => u.id === studentId ? { ...u, assignedEducatorId: educatorId } : u));
+    try {
+      await fetch('/api/users', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId: studentId, educatorId })
+      });
+    } catch {
+      fetchAll();
+    }
   };
 
   const markLessonAsRead = async (lessonId: string) => {
     if (!user || user.readLessons?.includes(lessonId)) return;
-    
-    await fetch('/api/users', {
+    // Instant local update
+    setUser(prev => prev ? { ...prev, readLessons: [...(prev.readLessons || []), lessonId] } : null);
+    // Fire-and-forget
+    fetch('/api/users', {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ userId: user.id, readLessonId: lessonId })
-    });
-    
-    setUser(prev => prev ? { ...prev, readLessons: [...(prev.readLessons || []), lessonId] } : null);
+    }).catch(() => {});
   };
 
   const createLesson = async (data: Omit<Lesson, 'id' | 'createdAt'>) => {
-    const res = await fetch('/api/lessons', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(data)
-    });
-    if (!res.ok) {
-      const err = await res.json();
-      console.error("Creation Failed:", err);
-      return;
+    // Optimistic: add a temporary lesson immediately
+    const tempId = `temp-${Date.now()}`;
+    const tempLesson: Lesson = {
+      ...data,
+      id: tempId,
+      createdAt: new Date().toISOString(),
+      assignedStudents: data.assignedStudents || [],
+      fileUrls: data.fileUrls || [],
+    };
+    setLessons(prev => [tempLesson, ...prev]);
+
+    try {
+      const res = await fetch('/api/lessons', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      });
+      if (!res.ok) {
+        // Rollback temp lesson
+        setLessons(prev => prev.filter(l => l.id !== tempId));
+        const err = await res.json();
+        console.error("Creation Failed:", err);
+        return;
+      }
+      const newLesson = await res.json();
+      const mapped = mapLesson(newLesson);
+      // Replace temp with real
+      setLessons(prev => prev.map(l => l.id === tempId ? mapped : l));
+    } catch {
+      setLessons(prev => prev.filter(l => l.id !== tempId));
+      fetchAll();
     }
-    fetchAll();
   };
 
   const updateLesson = async (id: string, updates: Partial<Lesson>) => {
-    const payload = { ...updates };
-
-    await fetch(`/api/lessons/${id}`, {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload)
-    });
-    fetchAll();
+    // Optimistic update
+    setLessons(prev => prev.map(l => l.id === id ? { ...l, ...updates } : l));
+    try {
+      await fetch(`/api/lessons/${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updates)
+      });
+    } catch {
+      fetchAll();
+    }
   };
 
   const deleteLesson = async (id: string) => {
-    await fetch(`/api/lessons/${id}`, { method: 'DELETE' });
-    fetchAll();
+    // Optimistic remove
+    const prev = lessons;
+    setLessons(p => p.filter(l => l.id !== id));
+    try {
+      await fetch(`/api/lessons/${id}`, { method: 'DELETE' });
+    } catch {
+      setLessons(prev);
+    }
   };
 
   const submitWork = async (lessonId: string, content: string, fileUrls?: string[], links?: string[]) => {
     if (!user) return;
-    await fetch('/api/submissions', {
+    const res = await fetch('/api/submissions', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ lessonId, studentId: user.id, content, fileUrls, links })
     });
-    fetchAll();
+    if (res.ok) {
+      const newSub = await res.json();
+      const mapped: Submission = {
+        ...newSub,
+        id: newSub._id || newSub.id,
+        submittedAt: newSub.createdAt || new Date().toISOString(),
+        fileUrls: newSub.fileUrls || []
+      };
+      setSubmissions(prev => [mapped, ...prev]);
+    }
+    // Background reconcile after 3s — no await
+    setTimeout(fetchAll, 3000);
   };
 
   const sendSupportRequest = async (message: string) => {
     if (!user || user.role !== 'student' || !user.assignedEducatorId) return;
-    await fetch('/api/support', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ 
-        studentId: user.id, 
-        educatorId: user.assignedEducatorId,
-        message, 
-        status: 'open' 
-      })
-    });
-    fetchAll();
+    // Optimistic: add temporary support request
+    const tempId = `temp-${Date.now()}`;
+    const tempReq: SupportRequest = {
+      id: tempId,
+      studentId: user.id,
+      educatorId: user.assignedEducatorId,
+      message,
+      status: 'open',
+      createdAt: new Date().toISOString(),
+      chat: []
+    };
+    setSupportRequests(prev => [tempReq, ...prev]);
+    try {
+      const res = await fetch('/api/support', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          studentId: user.id, 
+          educatorId: user.assignedEducatorId,
+          message, 
+          status: 'open' 
+        })
+      });
+      if (res.ok) {
+        const newReq = await res.json();
+        setSupportRequests(prev => prev.map(r => r.id === tempId ? { ...newReq, id: newReq._id } : r));
+      } else {
+        setSupportRequests(prev => prev.filter(r => r.id !== tempId));
+      }
+    } catch {
+      setSupportRequests(prev => prev.filter(r => r.id !== tempId));
+      fetchAll();
+    }
   };
 
   const rewardSubmission = async (submissionId: string, stars: number, feedback: string) => {
     const sub = submissions.find(s => s.id === submissionId);
     if (!sub) return;
-    await fetch('/api/submissions', {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ submissionId, stars, feedback, studentId: sub.studentId })
-    });
-    fetchAll();
+    // Optimistic: update submission immediately
+    setSubmissions(prev => prev.map(s =>
+      s.id === submissionId ? { ...s, rewardStars: stars, feedback, status: 'reviewed' } : s
+    ));
+    // Optimistic: add stars to student
+    setUsers(prev => prev.map(u =>
+      u.id === sub.studentId ? { ...u, stars: (u.stars || 0) + stars } : u
+    ));
+    try {
+      await fetch('/api/submissions', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ submissionId, stars, feedback, studentId: sub.studentId })
+      });
+    } catch {
+      fetchAll();
+    }
   };
 
   const resolveSupport = async (requestId: string) => {
-    await fetch('/api/support', {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ requestId, status: 'resolved' })
-    });
-    fetchAll();
+    // Optimistic
+    setSupportRequests(prev => prev.map(r => r.id === requestId ? { ...r, status: 'resolved' } : r));
+    try {
+      await fetch('/api/support', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ requestId, status: 'resolved' })
+      });
+    } catch {
+      fetchAll();
+    }
   };
 
   const sendSupportChatMessage = async (requestId: string, content: string) => {
     if (!user) return;
-    await fetch('/api/support', {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ 
-        requestId, 
-        chatMessage: {
-          senderId: user.id,
-          senderRole: user.role,
-          content
-        }
-      })
-    });
-    fetchAll();
+    const newMessage = {
+      senderId: user.id,
+      senderRole: user.role,
+      content,
+      timestamp: new Date().toISOString()
+    };
+    // Optimistic: add message to chat immediately
+    setSupportRequests(prev => prev.map(r =>
+      r.id === requestId
+        ? { ...r, chat: [...(r.chat || []), newMessage], educatorHasUnread: user.role === 'student', studentHasUnread: user.role === 'educator' }
+        : r
+    ));
+    try {
+      await fetch('/api/support', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ requestId, chatMessage: { senderId: user.id, senderRole: user.role, content } })
+      });
+    } catch {
+      fetchAll();
+    }
   };
 
   const markSupportAsRead = async (requestId: string, role: 'student' | 'educator') => {
-    await fetch('/api/support', {
+    // Optimistic
+    setSupportRequests(prev => prev.map(r =>
+      r.id === requestId
+        ? { ...r, studentHasUnread: role === 'student' ? false : r.studentHasUnread, educatorHasUnread: role === 'educator' ? false : r.educatorHasUnread }
+        : r
+    ));
+    // Fire-and-forget (non-critical read receipt)
+    fetch('/api/support', {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ requestId, markReadFor: role })
-    });
-    fetchAll();
+    }).catch(() => {});
   };
 
   const deleteUser = async (userId: string) => {
     if (!confirm("Are you sure? This will delete all data related to this user.")) return;
-    await fetch(`/api/users/${userId}`, { method: 'DELETE' });
-    fetchAll();
+    // Optimistic remove
+    const prevUsers = users;
+    setUsers(prev => prev.filter(u => u.id !== userId));
+    try {
+      await fetch(`/api/users/${userId}`, { method: 'DELETE' });
+    } catch {
+      setUsers(prevUsers);
+    }
   };
 
   const addStarsToUser = async (amount: number) => {
     if (!user) return;
-    const res = await fetch('/api/users', {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ userId: user.id, addStars: amount })
-    });
-    if (res.ok) {
-      const updatedUser = await res.json();
-      const mappedUser = { ...updatedUser, id: updatedUser._id, assignedEducatorId: updatedUser.educatorId };
-      setUser(mappedUser);
-      localStorage.setItem('cedar_session_v5', JSON.stringify(mappedUser));
+    // Optimistic
+    const updated = { ...user, stars: (user.stars || 0) + amount };
+    setUser(updated);
+    localStorage.setItem('cedar_session_v5', JSON.stringify(updated));
+    setUsers(prev => prev.map(u => u.id === user.id ? updated : u));
+    try {
+      const res = await fetch('/api/users', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId: user.id, addStars: amount })
+      });
+      if (res.ok) {
+        const updatedUser = await res.json();
+        const mappedUser = { ...updatedUser, id: updatedUser._id, assignedEducatorId: updatedUser.educatorId };
+        setUser(mappedUser);
+        localStorage.setItem('cedar_session_v5', JSON.stringify(mappedUser));
+      }
+    } catch {
+      // Rollback
+      setUser(user);
       fetchAll();
     }
   };
@@ -411,8 +542,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const getLessonsForStudent = (studentId: string) => {
     const student = users.find(u => u.id === studentId);
     if (!student || !student.assignedEducatorId) return [];
-    
-    const now = new Date();
     return lessons.filter(l => {
       const isAssigned = l.assignedStudents?.includes('all') || l.assignedStudents?.includes(studentId);
       return l.educatorId === student.assignedEducatorId && isAssigned;
@@ -420,30 +549,41 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const markNotificationAsRead = async (notificationId: string) => {
-    await fetch('/api/notifications', {
+    // Optimistic
+    setNotifications(prev => prev.map(n => n.id === notificationId ? { ...n, read: true } : n));
+    // Fire-and-forget
+    fetch('/api/notifications', {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ notificationId })
-    });
-    fetchAll();
+    }).catch(() => {});
   };
 
   const markAllNotificationsAsRead = async () => {
     if (!user) return;
-    await fetch('/api/notifications', {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ userId: user.id, readAll: true })
-    });
-    fetchAll();
+    // Optimistic
+    setNotifications(prev => prev.map(n => ({ ...n, read: true })));
+    try {
+      await fetch('/api/notifications', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId: user.id, readAll: true })
+      });
+    } catch {
+      fetchAll();
+    }
   };
 
   const clearAllNotifications = async () => {
     if (!user) return;
-    await fetch(`/api/notifications?userId=${user.id}`, {
-      method: 'DELETE'
-    });
-    fetchAll();
+    const prevNotifications = notifications;
+    // Optimistic
+    setNotifications([]);
+    try {
+      await fetch(`/api/notifications?userId=${user.id}`, { method: 'DELETE' });
+    } catch {
+      setNotifications(prevNotifications);
+    }
   };
 
   return (
