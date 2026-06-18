@@ -551,12 +551,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const markNotificationAsRead = async (notificationId: string) => {
     // Optimistic
     setNotifications(prev => prev.map(n => n.id === notificationId ? { ...n, read: true } : n));
-    // Fire-and-forget
-    fetch('/api/notifications', {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ notificationId })
-    }).catch(() => {});
+    try {
+      const res = await fetch('/api/notifications', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ notificationId })
+      });
+      if (!res.ok) throw new Error("Failed to mark notification as read");
+    } catch {
+      fetchAll();
+    }
   };
 
   const markAllNotificationsAsRead = async () => {
@@ -564,11 +568,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     // Optimistic
     setNotifications(prev => prev.map(n => ({ ...n, read: true })));
     try {
-      await fetch('/api/notifications', {
+      const res = await fetch('/api/notifications', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ userId: user.id, readAll: true })
       });
+      if (!res.ok) throw new Error("Failed to mark all as read");
     } catch {
       fetchAll();
     }
@@ -580,7 +585,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     // Optimistic
     setNotifications([]);
     try {
-      await fetch(`/api/notifications?userId=${user.id}`, { method: 'DELETE' });
+      const res = await fetch(`/api/notifications?userId=${user.id}`, { method: 'DELETE' });
+      if (!res.ok) throw new Error("Failed to clear notifications");
     } catch {
       setNotifications(prevNotifications);
     }

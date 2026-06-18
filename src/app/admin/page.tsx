@@ -6,6 +6,7 @@ import { CheckCircle2, XCircle, UserCheck, Shield, Users, Activity, BarChart3, S
 import { useState } from "react";
 import Link from "next/link";
 import RoleGuard from "@/components/RoleGuard";
+import NotificationsDropdown from "@/components/NotificationsDropdown";
 
 export default function AdminDashboard() {
   const { user, users, logout, updateUserStatus, assignStudent, deleteUser } = useAuth();
@@ -108,9 +109,12 @@ export default function AdminDashboard() {
       {/* Mobile Header */}
       <div className="lg:hidden bg-white border-b border-slate-200 px-6 py-4 flex justify-between items-center sticky top-0 z-[100] shadow-sm">
          <img src="https://cedarcentre.ca/wp-content/uploads/2023/07/cedar-logo1.svg" className="h-10" alt="Logo" />
-         <button onClick={() => setIsMobileMenuOpen(true)} className="p-3 bg-slate-50 rounded-xl text-slate-600">
-            <Menu className="w-6 h-6" />
-         </button>
+         <div className="flex items-center gap-3">
+            <NotificationsDropdown />
+            <button onClick={() => setIsMobileMenuOpen(true)} className="p-3 bg-slate-50 rounded-xl text-slate-600">
+               <Menu className="w-6 h-6" />
+            </button>
+         </div>
       </div>
 
       {/* Mobile Sidebar Overlay */}
@@ -146,11 +150,16 @@ export default function AdminDashboard() {
 
       {/* Main Content */}
       <main className="flex-1 p-6 lg:p-12 overflow-y-auto max-w-[1600px] mx-auto w-full">
-        <header className="mb-12">
+        <header className="mb-12 flex justify-between items-start">
+          <div>
             <p className="text-[10px] font-black uppercase text-cedar-primary tracking-[0.3em] mb-2">Platform Administration</p>
             <h1 className="text-4xl lg:text-5xl font-serif text-slate-800 italic">
               {activeTab === 'approvals' ? 'Registration Requests' : activeTab === 'assignments' ? 'Mentor Matching' : 'Member Directory'}
             </h1>
+          </div>
+          <div className="flex items-center gap-4 shrink-0">
+             <NotificationsDropdown />
+          </div>
         </header>
 
         {/* Stats Grid */}
