@@ -4,6 +4,15 @@ import { User } from '@/models/Schemas';
 import { sendEmail } from '@/lib/email';
 import { createNotification } from '@/lib/notifications';
 
+/** Derives the production base URL from the incoming request so emails
+ *  always link to the live site instead of localhost. */
+function getBaseUrl(request: Request): string {
+  const host = request.headers.get('x-forwarded-host') || request.headers.get('host') || '';
+  const proto = request.headers.get('x-forwarded-proto') || 'https';
+  if (host) return `${proto}://${host}`;
+  return process.env.NEXT_PUBLIC_APP_URL || 'https://stair.cedarcentre.ca';
+}
+
 export async function GET() {
   try {
     await dbConnect();
@@ -17,6 +26,7 @@ export async function GET() {
 export async function PATCH(request: Request) {
   try {
     await dbConnect();
+    const baseUrl = getBaseUrl(request);
     const { userId, status, educatorId, addStars, readLessonId } = await request.json();
     
     if (addStars) {
@@ -56,7 +66,7 @@ export async function PATCH(request: Request) {
               <p>We are happy to inform you that your Cedar Centre account has been approved by the administrator.</p>
               <p>Your account is now ready to use. You can log in using your email and password.</p>
               <div style="text-align: center; margin: 35px 0;">
-                <a href="${process.env.NEXT_PUBLIC_APP_URL}/login" class="button">Log In Now</a>
+                <a href="${baseUrl}/login" class="button">Log In Now</a>
               </div>
               <p style="color: #64748b; font-size: 14px;">Welcome to our community! We look forward to supporting you on your journey.</p>
             `

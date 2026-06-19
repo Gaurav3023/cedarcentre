@@ -10,7 +10,7 @@ import React, { useState, useEffect, useMemo, useCallback, Suspense } from "reac
 import RoleGuard from "@/components/RoleGuard";
 import { useSearchParams } from "next/navigation";
 import NotificationsDropdown from "@/components/NotificationsDropdown";
-import { inspirationalQuotes } from "@/data/quotes";
+
 
 function StudentDashboardContent() {
   const { user, users, lessons, markLessonAsRead, getLessonsForStudent, sendSupportRequest, sendSupportChatMessage, markSupportAsRead, supportRequests, submissions, logout } = useAuth();
@@ -91,19 +91,7 @@ function StudentDashboardContent() {
     return () => clearInterval(interval);
   }, []);
 
-  const [currentQuoteIndex, setCurrentQuoteIndex] = useState(0);
 
-  useEffect(() => {
-    const updateQuote = () => {
-      const now = new Date();
-      const totalMinutes = Math.floor(now.getTime() / 60000);
-      setCurrentQuoteIndex(totalMinutes % inspirationalQuotes.length);
-    };
-
-    updateQuote();
-    const timer = setInterval(updateQuote, 10000);
-    return () => clearInterval(timer);
-  }, []);
 
   const myLessons = useMemo(() => user ? getLessonsForStudent(user.id) : [], [user, getLessonsForStudent]);
 
@@ -154,7 +142,6 @@ function StudentDashboardContent() {
          </div>
          <div className="grid grid-cols-1 gap-4">
             <ResourceCard href="/student/safe-space" icon={<Cloud className="text-blue-400" />} title="Breathing rhythms" desc="Find your center" color="hover:border-blue-200" />
-            <ResourceCard href="/student/affirmations" icon={<Sun className="text-amber-500" />} title="Safe Affirmations" desc="Gentle daily reminders" color="hover:border-amber-200" />
          </div>
       </div>
     </div>
@@ -217,24 +204,22 @@ function StudentDashboardContent() {
                 animate={{ opacity: 1, y: 0 }} 
                 className="relative p-12 md:p-16 rounded-[4rem] shadow-premium overflow-hidden group border border-white bg-white"
               >
-                 {/* Vibrant Shifting Rainbow Background */}
                  <motion.div 
                    animate={{ 
                      background: [
-                       "linear-gradient(to bottom right, rgba(239, 68, 68, 0.15), rgba(255, 255, 255, 0))", // Red
-                       "linear-gradient(to bottom right, rgba(249, 115, 22, 0.15), rgba(255, 255, 255, 0))", // Orange
-                       "linear-gradient(to bottom right, rgba(234, 179, 8, 0.15), rgba(255, 255, 255, 0))",  // Yellow
-                       "linear-gradient(to bottom right, rgba(34, 197, 94, 0.15), rgba(255, 255, 255, 0))",  // Green
-                       "linear-gradient(to bottom right, rgba(59, 130, 246, 0.15), rgba(255, 255, 255, 0))", // Blue
-                       "linear-gradient(to bottom right, rgba(168, 85, 247, 0.15), rgba(255, 255, 255, 0))", // Purple
-                       "linear-gradient(to bottom right, rgba(239, 68, 68, 0.15), rgba(255, 255, 255, 0))"  // Back to Red
+                       "linear-gradient(to bottom right, rgba(239, 68, 68, 0.15), rgba(255, 255, 255, 0))",
+                       "linear-gradient(to bottom right, rgba(249, 115, 22, 0.15), rgba(255, 255, 255, 0))",
+                       "linear-gradient(to bottom right, rgba(234, 179, 8, 0.15), rgba(255, 255, 255, 0))",
+                       "linear-gradient(to bottom right, rgba(34, 197, 94, 0.15), rgba(255, 255, 255, 0))",
+                       "linear-gradient(to bottom right, rgba(59, 130, 246, 0.15), rgba(255, 255, 255, 0))",
+                       "linear-gradient(to bottom right, rgba(168, 85, 247, 0.15), rgba(255, 255, 255, 0))",
+                       "linear-gradient(to bottom right, rgba(239, 68, 68, 0.15), rgba(255, 255, 255, 0))"
                      ]
                    }}
                    transition={{ duration: 12, repeat: Infinity, ease: "linear" }}
                    className="absolute inset-0 z-0"
                  />
                  
-                 {/* Soft Moving Glow Spots */}
                  <motion.div 
                    animate={{ 
                      x: [0, 100, 0],
@@ -254,33 +239,11 @@ function StudentDashboardContent() {
                    className="absolute -bottom-20 -left-20 w-80 h-80 bg-cedar-aqua/10 blur-[80px] rounded-full pointer-events-none"
                  />
 
-
-
                  <div className="relative z-10">
-
                     <h2 className="text-5xl md:text-6xl font-serif text-slate-800 mb-6 leading-tight italic">
                       Hello, <span className="text-transparent bg-clip-text bg-gradient-to-r from-cedar-primary via-cedar-aqua to-cedar-primary bg-[length:200%_auto] animate-pulse">{user?.name.split(' ')[0]}</span>
                     </h2>
-                    <p className="text-xl md:text-2xl text-slate-500 max-w-md leading-relaxed font-medium mb-8">Ready for your next STAIR Program step?</p>
-                    
-                    {/* Rotating Inspiration Quote */}
-                    <motion.div 
-                      key={currentQuoteIndex}
-                      initial={{ opacity: 0, x: -20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      className="relative pl-8 border-l-4 border-cedar-primary/20 py-2 max-w-xl group/quote"
-                    >
-                       <p className="text-slate-400 font-serif italic text-lg md:text-xl leading-relaxed group-hover/quote:text-cedar-primary transition-colors duration-500">
-                         &quot;{inspirationalQuotes[currentQuoteIndex].split(' — ')[0]}&quot;
-                       </p>
-                       {inspirationalQuotes[currentQuoteIndex].includes(' — ') && (
-                         <p className="text-[10px] font-black uppercase tracking-widest text-slate-300 mt-3 flex items-center gap-2">
-                           <div className="w-4 h-[1px] bg-slate-200" />
-                           {inspirationalQuotes[currentQuoteIndex].split(' — ')[1]}
-                         </p>
-                       )}
-                       <div className="absolute -left-1 top-0 bottom-0 w-1 bg-cedar-primary opacity-0 group-hover/quote:opacity-100 transition-opacity" />
-                    </motion.div>
+                    <p className="text-xl md:text-2xl text-slate-500 max-w-md leading-relaxed font-medium mb-8">Welcome to the Cedar Centre STAIR Program Path.</p>
                  </div>
                  
                  <div className="absolute -right-20 -bottom-20 opacity-[0.03] pointer-events-none group-hover:opacity-[0.08] transition-all duration-1000 group-hover:scale-110 group-hover:-rotate-6">
@@ -292,7 +255,6 @@ function StudentDashboardContent() {
                  <div className="px-4 flex flex-col md:flex-row md:items-center justify-between gap-6">
                     <div>
                        <h3 className="text-4xl font-serif text-slate-800 italic">Your STAIR Program Path</h3>
-                       <p className="text-slate-400 mt-2 font-medium italic">Guided phases to support your growth.</p>
                     </div>
                     <div className="flex items-center gap-4">
                        <div className="flex p-1 bg-white border border-slate-100 rounded-2xl shadow-sm mr-2">
@@ -361,7 +323,7 @@ function StudentDashboardContent() {
                                            {isLocked ? (
                                               <div className="flex items-center gap-3 font-bold text-[10px] uppercase tracking-widest px-6 py-3 rounded-2xl bg-slate-200 text-slate-400 cursor-not-allowed">Locked <Lock className="w-4 h-4" /></div>
                                            ) : (
-                                              <Link href={`/student/lesson/${lesson.id}`} onClick={() => markLessonAsRead(lesson.id)} className={`flex items-center gap-3 font-bold text-[10px] uppercase tracking-widest px-6 py-3 rounded-2xl transition-all shadow-sm ${isCompleted ? 'bg-white text-slate-400 hover:text-cedar-primary' : isOverdue ? 'bg-red-600 text-white hover:bg-red-700' : 'bg-white text-slate-700 hover:bg-slate-900 hover:text-white'}`}>{isCompleted ? 'Review' : 'Begin'} <ChevronRight className="w-4 h-4" /></Link>
+                                              <Link href={`/student/lesson/${lesson.id}`} className={`flex items-center gap-3 font-bold text-[10px] uppercase tracking-widest px-6 py-3 rounded-2xl transition-all shadow-sm ${isCompleted ? 'bg-white text-slate-400 hover:text-cedar-primary' : isOverdue ? 'bg-red-600 text-white hover:bg-red-700' : 'bg-white text-slate-700 hover:bg-slate-900 hover:text-white'}`}>{isCompleted ? 'Review' : 'Begin'} <ChevronRight className="w-4 h-4" /></Link>
                                            )}
                                         </div>
                                      </motion.div>
@@ -558,15 +520,15 @@ function StudentDashboardContent() {
           )}
         </AnimatePresence>
 
-        {/* Journey Buddy & Quick Calm */}
-        <div className="fixed bottom-10 right-10 z-[1000] flex flex-col items-end gap-4">
+        {/* Journey Buddy & Quick Calm - hidden on mobile to avoid obstructing content */}
+        <div className="hidden sm:flex fixed bottom-6 right-6 lg:bottom-10 lg:right-10 z-[50] flex-col items-end gap-3">
            <AnimatePresence>
               {buddyMessage && (
                  <motion.div 
                    initial={{ opacity: 0, scale: 0.8, y: 20 }}
                    animate={{ opacity: 1, scale: 1, y: 0 }}
                    exit={{ opacity: 0, scale: 0.8, y: 20 }}
-                   className="bg-white px-6 py-4 rounded-[2rem] shadow-premium border border-slate-100 mb-2 max-w-[200px] relative"
+                   className="bg-white px-5 py-3 rounded-[2rem] shadow-premium border border-slate-100 mb-1 max-w-[180px] relative"
                  >
                     <p className="text-xs font-bold text-slate-700 leading-relaxed italic">"{buddyMessage}"</p>
                     <div className="absolute -bottom-2 right-8 w-4 h-4 bg-white border-r border-b border-slate-100 rotate-45" />
@@ -578,14 +540,14 @@ function StudentDashboardContent() {
               whileHover={{ scale: 1.1, rotate: 5 }}
               whileTap={{ scale: 0.9 }}
               onClick={() => setShowQuickCalm(true)}
-              className="w-20 h-20 bg-gradient-to-br from-cedar-primary to-cedar-aqua rounded-full shadow-premium flex items-center justify-center text-white relative group"
+              className="w-14 h-14 lg:w-20 lg:h-20 bg-gradient-to-br from-cedar-primary to-cedar-aqua rounded-full shadow-premium flex items-center justify-center text-white relative group"
            >
               <motion.div 
                 animate={{ scale: [1, 1.2, 1] }} 
                 transition={{ duration: 3, repeat: Infinity }} 
                 className="absolute inset-0 bg-white/20 rounded-full" 
               />
-              <Trees className="w-10 h-10 relative z-10" />
+              <Trees className="w-7 h-7 lg:w-10 lg:h-10 relative z-10" />
               <div className="absolute -top-12 right-0 bg-slate-900 text-white text-[9px] font-black uppercase tracking-widest px-4 py-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">Click for Quick Calm</div>
            </motion.button>
         </div>

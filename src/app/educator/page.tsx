@@ -38,6 +38,8 @@ function EducatorDashboardContent() {
   const { user, users, lessons, createLesson, updateLesson, deleteLesson, submissions, rewardSubmission, supportRequests, resolveSupport, sendSupportChatMessage, markSupportAsRead, logout } = useAuth();
   const searchParams = useSearchParams();
   const [activeTab, setActiveTab] = useState<'dashboard' | 'lessons' | 'students' | 'submissions' | 'support'>('dashboard');
+  const [isDragging, setIsDragging] = useState(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
   
   useEffect(() => {
     const tab = searchParams.get('tab');
@@ -740,74 +742,109 @@ function EducatorDashboardContent() {
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         {lessonForm.mediaUrls.map((url, idx) => (
                            <div key={idx} className="flex gap-2">
-                             <input placeholder="https://..." value={url} onChange={e => { const newUrls = [...lessonForm.mediaUrls]; newUrls[idx] = e.target.value; setLessonForm({...lessonForm, mediaUrls: newUrls}); }} className="flex-1 bg-slate-50 border border-slate-100 rounded-2xl px-6 py-4 text-xs outline-none" />
-                             {lessonForm.mediaUrls.length > 1 && <button type="button" onClick={() => setLessonForm({...lessonForm, mediaUrls: lessonForm.mediaUrls.filter((_, i) => i !== idx)})} className="p-4 text-red-300 hover:text-red-500 transition-colors"><Trash2 className="w-4 h-4" /></button>}
+                              <input placeholder="https://..." value={url} onChange={e => { const newUrls = [...lessonForm.mediaUrls]; newUrls[idx] = e.target.value; setLessonForm({...lessonForm, mediaUrls: newUrls}); }} className="flex-1 bg-slate-50 border border-slate-100 rounded-2xl px-6 py-4 text-xs outline-none" />
+                              {lessonForm.mediaUrls.length > 1 && <button type="button" onClick={() => setLessonForm({...lessonForm, mediaUrls: lessonForm.mediaUrls.filter((_, i) => i !== idx)})} className="p-4 text-red-300 hover:text-red-500 transition-colors"><Trash2 className="w-4 h-4" /></button>}
                            </div>
                         ))}
-                      </div>
-                   </div>
+                       </div>
+                    </div>
 
-                   <div className="space-y-8">
+                    {/* File Attachments with Drag-and-Drop */}
+                    <div className="space-y-8">
                       <div className="flex items-center justify-between px-1">
                         <h4 className="text-[10px] font-black uppercase text-slate-400 tracking-[0.2em] flex items-center gap-2">
                           <Paperclip className="w-4 h-4" /> File Attachments
                         </h4>
                       </div>
-                      
-                      <div className="bg-slate-50/50 p-10 rounded-[3rem] border border-slate-100">
+                      <div className="bg-slate-50/50 p-6 md:p-10 rounded-[3rem] border border-slate-100">
                         <div className="space-y-6">
                           {lessonForm.fileUrls.length > 0 && (
                             <div className="flex flex-wrap gap-3 mb-6">
                               {lessonForm.fileUrls.map((url, i) => {
-                                const fileName = url.includes('---') ? url.split('---')[1] : url.split('/').pop() || `File ${i+1}`;
+                                const fileName = url.startsWith('data:')
+                                  ? decodeURIComponent(url.split(';name=')[1]?.split(';')[0] || `File ${i+1}`)
+                                  : (url.includes('---') ? url.split('---')[1] : url.split('/').pop() || `File ${i+1}`);
                                 return (
-                                <div key={i} className="flex items-center gap-3 bg-white border border-slate-100 pl-4 pr-2 py-2 rounded-xl text-[10px] font-bold text-slate-600 shadow-sm group/item">
-                                   <FileText className="w-4 h-4 text-cedar-primary" />
-                                   <span className="truncate max-w-[150px]" title={fileName}>{fileName}</span>
-                                   <button type="button" onClick={() => setLessonForm({...lessonForm, fileUrls: lessonForm.fileUrls.filter((_, idx) => idx !== i)})} className="p-1.5 hover:bg-red-50 hover:text-red-500 rounded-lg transition-all">
-                                     <X className="w-4 h-4" />
-                                   </button>
-                                </div>
+                                  <div key={i} className="flex items-center gap-3 bg-white border border-slate-100 pl-4 pr-2 py-2 rounded-xl text-[10px] font-bold text-slate-600 shadow-sm">
+                                    <FileText className="w-4 h-4 text-cedar-primary shrink-0" />
+                                    <span className="truncate max-w-[140px]" title={fileName}>{fileName}</span>
+                                    <button type="button" onClick={() => setLessonForm({...lessonForm, fileUrls: lessonForm.fileUrls.filter((_, idx) => idx !== i)})} className="p-1.5 hover:bg-red-50 hover:text-red-500 rounded-lg transition-all">
+                                      <X className="w-4 h-4" />
+                                    </button>
+                                  </div>
                                 );
                               })}
                             </div>
                           )}
-                          
-                          <div className="relative group">
-                             <div className="w-full h-40 border-2 border-dashed border-slate-200 rounded-[2.5rem] flex flex-col items-center justify-center hover:border-cedar-primary hover:bg-cedar-primary/5 transition-all cursor-pointer bg-white/50 shadow-inner">
-                                <div className="w-12 h-12 bg-slate-50 rounded-2xl flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
-                                   <FileUp className="w-6 h-6 text-slate-400 group-hover:text-cedar-primary" />
-                                </div>
-                                <p className="text-[10px] font-black uppercase text-slate-400 tracking-widest">Upload Device Artifacts</p>
-                                <p className="text-[9px] text-slate-300 mt-1 uppercase font-bold tracking-tight">PDF, Doc, Image or Video</p>
-                             </div>
-                             <input 
-                               type="file" 
-                               multiple
-                               className="absolute inset-0 opacity-0 cursor-pointer" 
-                               onChange={async (e) => {
-                                  const files = e.target.files;
-                                  if (!files) return;
-                                  
-                                  const newUrls = [...lessonForm.fileUrls];
-                                  for (let i = 0; i < files.length; i++) {
-                                    const data = new FormData();
-                                    data.append('file', files[i]);
-                                    try {
-                                      const res = await fetch('/api/upload', { method: 'POST', body: data });
-                                      const { url } = await res.json();
-                                      newUrls.push(url);
-                                    } catch (err) {
-                                      console.error("Upload failed", err);
-                                    }
+                          {uploadError && (
+                            <div className="flex items-center gap-3 p-4 bg-red-50 border border-red-100 rounded-2xl text-red-500 text-xs font-bold">
+                              <X className="w-4 h-4 shrink-0" />
+                              {uploadError}
+                            </div>
+                          )}
+                          <div
+                            className={`relative group transition-all ${isDragging ? 'scale-[1.02]' : ''}`}
+                            onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
+                            onDragLeave={() => setIsDragging(false)}
+                            onDrop={async (e) => {
+                              e.preventDefault();
+                              setIsDragging(false);
+                              setUploadError(null);
+                              const files = Array.from(e.dataTransfer.files);
+                              const newUrls = [...lessonForm.fileUrls];
+                              for (const file of files) {
+                                const data = new FormData();
+                                data.append('file', file);
+                                try {
+                                  const res = await fetch('/api/upload', { method: 'POST', body: data });
+                                  const json = await res.json();
+                                  if (!res.ok) throw new Error(json.error || 'Upload failed');
+                                  newUrls.push(json.url);
+                                } catch (err: any) {
+                                  setUploadError(err.message || 'Upload failed. Please try again.');
+                                }
+                              }
+                              setLessonForm({...lessonForm, fileUrls: newUrls});
+                            }}
+                          >
+                            <div className={`w-full h-40 border-2 border-dashed rounded-[2.5rem] flex flex-col items-center justify-center transition-all cursor-pointer shadow-inner ${isDragging ? 'border-cedar-primary bg-cedar-primary/10' : 'border-slate-200 bg-white/50 hover:border-cedar-primary hover:bg-cedar-primary/5'}`}>
+                              <div className="w-12 h-12 bg-slate-50 rounded-2xl flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+                                <FileUp className="w-6 h-6 text-slate-400 group-hover:text-cedar-primary" />
+                              </div>
+                              <p className="text-[10px] font-black uppercase text-slate-400 tracking-widest">
+                                {isDragging ? 'Drop files here' : 'Drag & drop or click to upload'}
+                              </p>
+                              <p className="text-[9px] text-slate-300 mt-1 uppercase font-bold tracking-tight">PDF, Doc, Image or Video · Max 10MB</p>
+                            </div>
+                            <input
+                              type="file"
+                              multiple
+                              className="absolute inset-0 opacity-0 cursor-pointer"
+                              onChange={async (e) => {
+                                const files = e.target.files;
+                                if (!files) return;
+                                setUploadError(null);
+                                const newUrls = [...lessonForm.fileUrls];
+                                for (let i = 0; i < files.length; i++) {
+                                  const data = new FormData();
+                                  data.append('file', files[i]);
+                                  try {
+                                    const res = await fetch('/api/upload', { method: 'POST', body: data });
+                                    const json = await res.json();
+                                    if (!res.ok) throw new Error(json.error || 'Upload failed');
+                                    newUrls.push(json.url);
+                                  } catch (err: any) {
+                                    setUploadError(err.message || 'Upload failed. Please try again.');
                                   }
-                                  setLessonForm({...lessonForm, fileUrls: newUrls});
-                               }}
-                             />
+                                }
+                                setLessonForm({...lessonForm, fileUrls: newUrls});
+                                e.target.value = '';
+                              }}
+                            />
                           </div>
                         </div>
                       </div>
-                   </div>
+                    </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8 pt-4">
                        <DateTimePicker

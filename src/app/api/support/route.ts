@@ -4,6 +4,16 @@ import { SupportRequest, User } from '@/models/Schemas';
 import { sendEmail } from '@/lib/email';
 import { createNotification } from '@/lib/notifications';
 
+/** Derives the production base URL from the incoming request so emails
+ *  always link to the live site instead of localhost. */
+function getBaseUrl(request: Request): string {
+  const host = request.headers.get('x-forwarded-host') || request.headers.get('host') || '';
+  const proto = request.headers.get('x-forwarded-proto') || 'https';
+  if (host) return `${proto}://${host}`;
+  // Fallback: use env var (set to production URL in deployment)
+  return process.env.NEXT_PUBLIC_APP_URL || 'https://stair.cedarcentre.ca';
+}
+
 export async function GET() {
   try {
     await dbConnect();
@@ -24,6 +34,7 @@ export async function POST(request: Request) {
   try {
     await dbConnect();
     const data = await request.json();
+    const baseUrl = getBaseUrl(request);
     const newRequest = await SupportRequest.create({
       ...data,
       educatorHasUnread: true // New request should alert educator
@@ -55,7 +66,7 @@ export async function POST(request: Request) {
             </div>
             <p>You can view and respond to this request in your Coach dashboard.</p>
             <div style="text-align: center; margin: 35px 0;">
-              <a href="${process.env.NEXT_PUBLIC_APP_URL}/educator" class="button">Respond Now</a>
+              <a href="${baseUrl}/educator" class="button">Respond Now</a>
             </div>
           `
         });
@@ -73,6 +84,7 @@ export async function POST(request: Request) {
 export async function PATCH(request: Request) {
   try {
     await dbConnect();
+    const baseUrl = getBaseUrl(request);
     const { requestId, status, chatMessage, markReadFor } = await request.json();
     
     let update: any = {};
@@ -134,7 +146,7 @@ export async function PATCH(request: Request) {
               </div>
               <p>Log in to your dashboard to reply.</p>
               <div style="text-align: center; margin: 35px 0;">
-                <a href="${process.env.NEXT_PUBLIC_APP_URL}/${recipientRole}" class="button">View Message</a>
+                <a href="${baseUrl}/${recipientRole}" class="button">View Message</a>
               </div>
             `
           });

@@ -36,6 +36,8 @@ export async function POST(request: Request) {
     
     const newLesson = await Lesson.create(lessonData);
 
+    const { origin } = new URL(request.url);
+
     // ── Fire-and-forget: notifications + emails send in background ──────────
     // We do NOT await this block — the response is returned immediately after
     // saving the lesson so the coach UI is never blocked waiting for emails.
@@ -87,7 +89,7 @@ export async function POST(request: Request) {
               </div>
               <p>${actionText}</p>
               <div style="text-align: center; margin: 35px 0;">
-                <a href="${process.env.NEXT_PUBLIC_APP_URL}/student" class="button">View Dashboard</a>
+                <a href="${origin}/student" class="button">View Dashboard</a>
               </div>
               <p style="color: #64748b; font-size: 14px;">Happy learning!</p>
             `

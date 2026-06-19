@@ -30,7 +30,8 @@ export async function POST(request: Request) {
     await user.save();
 
     // Send email using utility
-    const resetUrl = `${process.env.NEXT_PUBLIC_APP_URL}/reset-password?token=${resetToken}`;
+    const { origin } = new URL(request.url);
+    const resetUrl = `${origin}/reset-password?token=${resetToken}`;
     
     await sendEmail({
       to: user.email,

@@ -111,6 +111,7 @@ export async function PATCH(request: Request) {
           link: '/student'
         });
 
+        const { origin } = new URL(request.url);
         try {
           await sendEmail({
             to: student.email,
@@ -125,7 +126,7 @@ export async function PATCH(request: Request) {
               </div>
               <p>Check your dashboard to see your updated star count and feedback.</p>
               <div style="text-align: center; margin: 35px 0;">
-                <a href="${process.env.NEXT_PUBLIC_APP_URL}/student" class="button">View Dashboard</a>
+                <a href="${origin}/student" class="button">View Dashboard</a>
               </div>
             `
           });

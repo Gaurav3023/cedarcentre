@@ -112,20 +112,16 @@ export default function LessonDetailPage() {
 
                   const renderVideo = (url: string) => {
                     let embedUrl = url;
-                    if (url.includes('youtube.com') || url.includes('youtu.be')) {
-                      let videoId = "";
-                      if (url.includes('v=')) {
-                        videoId = url.split('v=')[1].split('&')[0];
-                      } else if (url.includes('youtu.be/')) {
-                        videoId = url.split('youtu.be/')[1].split('?')[0];
-                      } else if (url.includes('embed/')) {
-                        videoId = url.split('embed/')[1].split('?')[0];
-                      }
-                      embedUrl = videoId ? `https://www.youtube.com/embed/${videoId}` : url;
+                    
+                    // Robust YouTube ID extraction
+                    const ytMatch = url.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=|shorts\/))([\w-]{11})/);
+                    if (ytMatch && ytMatch[1]) {
+                      embedUrl = `https://www.youtube.com/embed/${ytMatch[1]}`;
                     } else if (url.includes('vimeo.com')) {
                       const vimeoId = url.split('/').pop()?.split('?')[0];
                       embedUrl = vimeoId ? `https://player.vimeo.com/video/${vimeoId}` : url;
                     }
+
                     return (
                       <div key={url} className="aspect-video bg-slate-900 rounded-[3.5rem] shadow-2xl overflow-hidden relative border-8 border-slate-800">
                          <iframe 
@@ -136,6 +132,35 @@ export default function LessonDetailPage() {
                          />
                       </div>
                     );
+                  };
+
+                  const handleViewFile = async (e: React.MouseEvent, url: string) => {
+                    e.preventDefault();
+                    if (url.startsWith('data:')) {
+                      try {
+                        // Convert data URL to Blob to safely open in a new tab (bypasses browser security blocks on data URIs)
+                        const response = await fetch(url);
+                        const blob = await response.blob();
+                        const blobUrl = URL.createObjectURL(blob);
+                        window.open(blobUrl, '_blank');
+                        // Clean up after 1 minute
+                        setTimeout(() => URL.revokeObjectURL(blobUrl), 60000);
+                      } catch (err) {
+                        console.error("Error viewing file", err);
+                      }
+                    } else {
+                      window.open(url, '_blank');
+                    }
+                  };
+
+                  const handleDownloadFile = (e: React.MouseEvent, url: string, fileName: string) => {
+                    e.preventDefault();
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = fileName;
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
                   };
 
                   return (
@@ -211,19 +236,38 @@ export default function LessonDetailPage() {
                               <h4 className="text-xs font-black uppercase tracking-widest text-slate-400 ml-4">Handouts</h4>
                               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 {lesson.fileUrls.map((url, i) => {
-                                  const absoluteUrl = url.startsWith('http') || url.startsWith('/') ? url : `https://${url}`;
-                                  let fileName = url.includes('---') ? decodeURIComponent(url.split('---')[1]) : url.split('/').pop() || `Handout #${i+1}`;
+                                  const absoluteUrl = url.startsWith('http') || url.startsWith('/') || url.startsWith('data:') ? url : `https://${url}`;
+                                  let fileName = url.startsWith('data:') 
+                                    ? decodeURIComponent(url.split(';name=')[1]?.split(';')[0] || `Handout #${i+1}`)
+                                    : (url.includes('---') ? decodeURIComponent(url.split('---')[1]) : url.split('/').pop() || `Handout #${i+1}`);
                                   if (fileName.includes('?')) fileName = fileName.split('?')[0];
+                                  
                                   return (
-                                    <a key={i} href={absoluteUrl} target="_blank" className="p-8 bg-slate-50 rounded-[2.5rem] border border-slate-100 flex items-center justify-between gap-6 group hover:border-cedar-primary transition-all">
+                                    <div 
+                                      key={i} 
+                                      className="p-6 bg-slate-50 rounded-[2.5rem] border border-slate-100 flex flex-col gap-5 group hover:border-cedar-primary transition-all"
+                                    >
                                       <div className="flex items-center gap-5">
-                                          <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center shadow-sm text-cedar-primary group-hover:bg-cedar-primary group-hover:text-white transition-all">
+                                          <div className="w-12 h-12 shrink-0 bg-white rounded-2xl flex items-center justify-center shadow-sm text-cedar-primary group-hover:bg-cedar-primary group-hover:text-white transition-all">
                                             <FileText className="w-6 h-6" />
                                           </div>
-                                          <span className="text-sm font-bold text-slate-700 truncate max-w-[150px]" title={fileName}>{fileName}</span>
+                                          <span className="text-sm font-bold text-slate-700 truncate" title={fileName}>{fileName}</span>
                                       </div>
-                                      <span className="text-[10px] font-black uppercase text-cedar-primary hover:underline">View</span>
-                                    </a>
+                                      <div className="flex items-center gap-3">
+                                        <button 
+                                          onClick={(e) => handleViewFile(e, absoluteUrl)} 
+                                          className="flex-1 py-2.5 bg-white text-cedar-primary border border-cedar-primary/20 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-cedar-primary hover:text-white transition-all"
+                                        >
+                                          View
+                                        </button>
+                                        <button 
+                                          onClick={(e) => handleDownloadFile(e, absoluteUrl, fileName)} 
+                                          className="flex-1 py-2.5 bg-cedar-primary text-white border border-cedar-primary rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-cedar-primary/90 transition-all"
+                                        >
+                                          Download
+                                        </button>
+                                      </div>
+                                    </div>
                                   );
                                 })}
                               </div>
@@ -233,7 +277,7 @@ export default function LessonDetailPage() {
                       )}
                     </>
                   );
-               })()}
+                })()}
            </div>
 
            <div className="bg-white p-12 md:p-24 rounded-[4rem] shadow-[0_30px_60px_-15px_rgba(0,0,0,0.05)] relative border border-slate-50 overflow-hidden">
