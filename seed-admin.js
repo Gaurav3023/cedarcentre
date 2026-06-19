@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 
 // Manually pulling from env format for standalone script
-const MONGODB_URI = "mongodb+srv://gaurav30:%40Gaurav123@cluster0.eicxaqs.mongodb.net/cedar_centre?retryWrites=true&w=majority";
+const MONGODB_URI = "mongodb+srv://ccstairprogram_db_user:cedarcentre2026@cedarcentre.gma0fuf.mongodb.net/cedar_centre?retryWrites=true&w=majority";
 
 const UserSchema = new mongoose.Schema({
   name: { type: String, required: true },
