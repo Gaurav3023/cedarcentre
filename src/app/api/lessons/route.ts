@@ -3,6 +3,7 @@ import dbConnect from '@/lib/dbConnect';
 import { Lesson, User } from '@/models/Schemas';
 import { sendEmailBackground } from '@/lib/email';
 import { createNotification } from '@/lib/notifications';
+import { waitUntil } from '@vercel/functions';
 import { getSession } from '@/lib/auth';
 
 export async function GET() {
@@ -41,7 +42,7 @@ export async function POST(request: Request) {
     // ── Fire-and-forget: notifications + emails send in background ──────────
     // We do NOT await this block — the response is returned immediately after
     // saving the lesson so the coach UI is never blocked waiting for emails.
-    (async () => {
+    waitUntil((async () => {
       try {
         const educator = await User.findById(lessonData.educatorId);
         let studentQuery: any = { role: 'student' };
@@ -98,7 +99,7 @@ export async function POST(request: Request) {
       } catch (bgError) {
         console.error("Background notification error:", bgError);
       }
-    })();
+    })());
     // ────────────────────────────────────────────────────────────────────────
 
     return NextResponse.json(newLesson);

@@ -3,6 +3,7 @@ import dbConnect from '@/lib/dbConnect';
 import { User } from '@/models/Schemas';
 import { sendEmailBackground } from '@/lib/email';
 import { createNotification } from '@/lib/notifications';
+import { waitUntil } from '@vercel/functions';
 
 /** Derives the production base URL from the incoming request so emails
  *  always link to the live site instead of localhost. */
@@ -49,7 +50,7 @@ export async function PATCH(request: Request) {
 
     // Send approval email if status changed to approved (fire-and-forget)
     if (status === 'approved' && (oldUser as any)?.status !== 'approved') {
-      (async () => {
+      waitUntil((async () => {
         try {
           await createNotification({
             userId: user._id,
@@ -72,7 +73,7 @@ export async function PATCH(request: Request) {
             `
           });
         } catch (e) { console.error('Approval email error:', e); }
-      })();
+      })());
     }
 
     return NextResponse.json(user);
