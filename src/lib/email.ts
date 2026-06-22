@@ -1,6 +1,8 @@
 import nodemailer from 'nodemailer';
+import { waitUntil } from '@vercel/functions';
 
 const transporter = nodemailer.createTransport({
+  pool: true,
   host: process.env.SMTP_HOST,
   port: parseInt(process.env.SMTP_PORT || '587'),
   secure: process.env.SMTP_SECURE === 'true',
@@ -12,6 +14,10 @@ const transporter = nodemailer.createTransport({
 
 const LOGO_URL = 'https://cedarcentre.ca/wp-content/uploads/2023/07/cedar-logo1.svg';
 const PRIMARY_COLOR = '#017196'; // Cedar Centre Dark Blue
+
+export const sendEmailBackground = (options: { to: string; subject: string; html: string }) => {
+  waitUntil(sendEmail(options));
+};
 
 export const sendEmail = async ({ to, subject, html }: { to: string; subject: string; html: string }) => {
   const mailOptions = {

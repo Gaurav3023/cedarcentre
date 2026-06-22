@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import dbConnect from '@/lib/dbConnect';
 import { User } from '@/models/Schemas';
 import bcrypt from 'bcryptjs';
-import { sendEmail } from '@/lib/email';
+import { sendEmailBackground } from '@/lib/email';
 
 import { rateLimit } from '@/lib/rateLimit';
 
@@ -35,7 +35,7 @@ export async function POST(request: Request) {
 
     // Send confirmation email in background (non-blocking)
     if (newUser.status === 'pending') {
-      sendEmail({
+      sendEmailBackground({
         to: newUser.email,
         subject: 'Welcome to Cedar Centre - Account Pending Approval',
         html: `

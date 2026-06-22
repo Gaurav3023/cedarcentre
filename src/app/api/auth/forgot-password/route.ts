@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import dbConnect from '@/lib/dbConnect';
 import { User } from '@/models/Schemas';
 import crypto from 'crypto';
-import { sendEmail } from '@/lib/email';
+import { sendEmailBackground } from '@/lib/email';
 
 export async function POST(request: Request) {
   try {
@@ -33,7 +33,7 @@ export async function POST(request: Request) {
     const { origin } = new URL(request.url);
     const resetUrl = `${origin}/reset-password?token=${resetToken}`;
     
-    await sendEmail({
+    sendEmailBackground({
       to: user.email,
       subject: 'Password Reset Request',
       html: `

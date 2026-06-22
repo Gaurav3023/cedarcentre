@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import dbConnect from '@/lib/dbConnect';
 import { Submission, User, Lesson } from '@/models/Schemas';
-import { sendEmail } from '@/lib/email';
+import { sendEmailBackground } from '@/lib/email';
 import { createNotification } from '@/lib/notifications';
 import { getSession } from '@/lib/auth';
 
@@ -113,7 +113,7 @@ export async function PATCH(request: Request) {
 
         const { origin } = new URL(request.url);
         try {
-          await sendEmail({
+          sendEmailBackground({
             to: student.email,
             subject: 'Your Work Has Been Graded!',
             html: `

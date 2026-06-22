@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import dbConnect from '@/lib/dbConnect';
 import { SupportRequest, User } from '@/models/Schemas';
-import { sendEmail } from '@/lib/email';
+import { sendEmailBackground } from '@/lib/email';
 import { createNotification } from '@/lib/notifications';
 
 /** Derives the production base URL from the incoming request so emails
@@ -54,7 +54,7 @@ export async function POST(request: Request) {
           link: '/educator?tab=support'
         });
 
-        await sendEmail({
+        sendEmailBackground({
           to: educator.email,
           subject: `New Assistance Request from ${student.name}`,
           html: `
@@ -134,7 +134,7 @@ export async function PATCH(request: Request) {
             link: `/${recipientRole}?tab=support`
           });
 
-          await sendEmail({
+          sendEmailBackground({
             to: recipient.email,
             subject: `New Message from ${sender.name}`,
             html: `

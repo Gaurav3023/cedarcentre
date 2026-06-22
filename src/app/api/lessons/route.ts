@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import dbConnect from '@/lib/dbConnect';
 import { Lesson, User } from '@/models/Schemas';
-import { sendEmail } from '@/lib/email';
+import { sendEmailBackground } from '@/lib/email';
 import { createNotification } from '@/lib/notifications';
 import { getSession } from '@/lib/auth';
 
@@ -75,7 +75,7 @@ export async function POST(request: Request) {
 
         // Send all emails in parallel
         await Promise.all(students.map(student =>
-          sendEmail({
+          sendEmailBackground({
             to: student.email,
             subject: `${isFutureRelease ? 'Upcoming' : 'New'} Content: ${newLesson.title}${weekLabel ? ` (${weekLabel})` : ''}`,
             html: `

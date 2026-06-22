@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import dbConnect from '@/lib/dbConnect';
 import { User } from '@/models/Schemas';
-import { sendEmail } from '@/lib/email';
+import { sendEmailBackground } from '@/lib/email';
 import { createNotification } from '@/lib/notifications';
 
 /** Derives the production base URL from the incoming request so emails
@@ -58,7 +58,7 @@ export async function PATCH(request: Request) {
             type: 'system',
             link: '/login'
           });
-          await sendEmail({
+          sendEmailBackground({
             to: user.email,
             subject: 'Your Cedar Centre Account is Approved!',
             html: `
