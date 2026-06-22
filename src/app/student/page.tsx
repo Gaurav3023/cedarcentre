@@ -176,9 +176,9 @@ function StudentDashboardContent() {
               <MessageCircle className="w-5 h-5" />
               {hasUnreadSupport && <span className="absolute -top-1 -right-1 w-3 h-3 bg-white rounded-full border-2 border-red-500 animate-ping" />}
             </button>
-            <button onClick={logout} className="flex items-center gap-2 px-5 py-3 bg-red-50 text-red-600 hover:bg-red-600 hover:text-white transition-all rounded-2xl shadow-sm border border-red-100 group">
+            <button onClick={logout} className="flex items-center gap-2 px-3 py-3 md:px-5 md:py-3 bg-red-50 text-red-600 hover:bg-red-600 hover:text-white transition-all rounded-2xl shadow-sm border border-red-100 group">
               <LogOut className="w-5 h-5" />
-              <span className="font-bold text-[10px] uppercase tracking-widest ">Logout</span>
+              <span className="hidden md:inline font-bold text-[10px] uppercase tracking-widest ">Logout</span>
             </button>
           </div>
         </header>

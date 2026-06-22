@@ -137,30 +137,79 @@ export default function LessonDetailPage() {
                   const handleViewFile = async (e: React.MouseEvent, url: string) => {
                     e.preventDefault();
                     if (url.startsWith('data:')) {
+                      // Open window synchronously to avoid mobile popup blockers
+                      const newWindow = window.open('', '_blank');
                       try {
                         // Convert data URL to Blob to safely open in a new tab (bypasses browser security blocks on data URIs)
                         const response = await fetch(url);
                         const blob = await response.blob();
                         const blobUrl = URL.createObjectURL(blob);
-                        window.open(blobUrl, '_blank');
+                        if (newWindow) {
+                          newWindow.location.href = blobUrl;
+                        } else {
+                          window.open(blobUrl, '_blank');
+                        }
                         // Clean up after 1 minute
                         setTimeout(() => URL.revokeObjectURL(blobUrl), 60000);
                       } catch (err) {
                         console.error("Error viewing file", err);
+                        if (newWindow) newWindow.close();
                       }
                     } else {
                       window.open(url, '_blank');
                     }
                   };
 
-                  const handleDownloadFile = (e: React.MouseEvent, url: string, fileName: string) => {
+                  const handleDownloadFile = async (e: React.MouseEvent, url: string, fileName: string) => {
                     e.preventDefault();
-                    const a = document.createElement('a');
-                    a.href = url;
-                    a.download = fileName;
-                    document.body.appendChild(a);
-                    a.click();
-                    document.body.removeChild(a);
+                    if (url.startsWith('data:')) {
+                      try {
+                        const response = await fetch(url);
+                        const originalBlob = await response.blob();
+                        // Force download by overriding the MIME type
+                        const blob = new Blob([originalBlob], { type: 'application/octet-stream' });
+                        const blobUrl = URL.createObjectURL(blob);
+                        
+                        const a = document.createElement('a');
+                        a.style.display = 'none';
+                        a.href = blobUrl;
+                        a.download = fileName;
+                        document.body.appendChild(a);
+                        a.click();
+                        document.body.removeChild(a);
+                        
+                        setTimeout(() => URL.revokeObjectURL(blobUrl), 60000);
+                      } catch (err) {
+                        console.error("Error downloading file", err);
+                      }
+                    } else {
+                      try {
+                        // For regular URLs on mobile, fetching it as a blob and forcing octet-stream is the most reliable way to prevent opening in a new tab
+                        const response = await fetch(url);
+                        const originalBlob = await response.blob();
+                        const blob = new Blob([originalBlob], { type: 'application/octet-stream' });
+                        const blobUrl = URL.createObjectURL(blob);
+                        
+                        const a = document.createElement('a');
+                        a.style.display = 'none';
+                        a.href = blobUrl;
+                        a.download = fileName;
+                        document.body.appendChild(a);
+                        a.click();
+                        document.body.removeChild(a);
+                        
+                        setTimeout(() => URL.revokeObjectURL(blobUrl), 60000);
+                      } catch (err) {
+                        // Fallback if fetch fails (e.g. CORS)
+                        const a = document.createElement('a');
+                        a.style.display = 'none';
+                        a.href = url;
+                        a.download = fileName;
+                        document.body.appendChild(a);
+                        a.click();
+                        document.body.removeChild(a);
+                      }
+                    }
                   };
 
                   return (
@@ -317,8 +366,8 @@ export default function LessonDetailPage() {
               ) : (
                 <form onSubmit={handleSubmit}>
                    <div className="flex justify-center">
-                      <button type="submit" disabled={submitting} className="group relative bg-cedar-primary px-24 py-8 rounded-[2.5rem] shadow-[0_30px_60px_-15px_rgba(45,123,138,0.4)] hover:shadow-[0_40px_80px_-15px_rgba(45,123,138,0.6)] hover:translate-y-[-5px] active:translate-y-[2px] transition-all overflow-hidden w-full md:w-auto min-w-[400px]">
-                         <div className="relative z-10 flex items-center justify-center gap-5 text-white font-serif text-2xl">
+                      <button type="submit" disabled={submitting} className="group relative bg-cedar-primary px-8 py-5 md:px-24 md:py-8 rounded-3xl md:rounded-[2.5rem] shadow-[0_30px_60px_-15px_rgba(45,123,138,0.4)] hover:shadow-[0_40px_80px_-15px_rgba(45,123,138,0.6)] hover:translate-y-[-5px] active:translate-y-[2px] transition-all overflow-hidden w-full md:w-auto md:min-w-[400px]">
+                         <div className="relative z-10 flex items-center justify-center gap-5 text-white font-serif text-xl md:text-2xl">
                             {submitting ? (
                               <span className="animate-pulse flex items-center gap-4"><Sparkles className="w-6 h-6 animate-spin" /> Completing...</span>
                             ) : (
