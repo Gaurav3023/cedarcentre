@@ -46,7 +46,7 @@ export async function POST(request: Request) {
           <div class="divider"></div>
           <p style="color: #64748b; font-size: 14px;">If you have any questions, please feel free to contact us.</p>
         `
-      }).catch(err => console.error("Signup email send error:", err));
+      });
     }
 
     return NextResponse.json({ 
